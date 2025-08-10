@@ -81,7 +81,11 @@ document.addEventListener("DOMContentLoaded", () => {
       menu.appendChild(option);
     });
 
-    dayCell.appendChild(menu);
+   widgetBox.appendChild(menu);
+
+// Store reference to which day this menu belongs to (for positioning & closing)
+menu.dataset.day = dayCell.dataset.day;
+
   }
 
   // Update a day cell's display based on selected mood or empty
@@ -162,13 +166,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Change theme when selecting a theme circle
   themeOptions.querySelectorAll('.theme-option-circle').forEach(option => {
-    option.addEventListener('click', e => {
-      const selected = e.target.dataset.theme;
-      widgetBox.className = `widget theme-${selected}`;
-      currentThemeCircle.style.backgroundColor = themes[selected];
-      localStorage.setItem('mood-theme', selected);
-      themeOptions.classList.add('hidden');
-    });
+   option.addEventListener('click', e => {
+  e.stopPropagation();
+  saveMood(menu.dataset.day, mood);
+  updateDayCell(document.querySelector(`.day-cell[data-day="${menu.dataset.day}"]`), mood);
+  menu.remove();
+});
+
   });
 
   // Load saved theme or default pink
