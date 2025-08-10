@@ -184,21 +184,39 @@ body {
 .mood-color:hover {
   border-color: #666;
 }
+.reset-btn {
+  margin-top: 10px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-family: 'Work Sans', sans-serif;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  text-transform: lowercase;
+  color: #555;
+  transition: background 0.2s;
+}
+
+.reset-btn:hover {
+  background: #f2f2f2;
+}
+
 
 /* Themes */
 
 .theme-pink {
-  background-color: #ffeef2;
+  background-color: #ffe7f5;
 }
 
 .theme-green {
-  background-color: #e7f8ee;
+  background-color: #daece1;
 }
 
 .theme-lavender {
-  background-color: #f3e8ff;
+  background-color: #f6e5fc;
 }
 
 .theme-blue {
-  background-color: #e0f0ff;
+  background-color: #dceaf5;
 }
