@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const moods = [
     { color: '#FEF1C8', label: 'good' },
-    { color: '#F7E0E4', label: 'loved' },
+    { color: '#FFA7A6', label: 'loved' },
     { color: '#C3C2D5', label: 'rough' },
     { color: '#C4DADE', label: 'calm' },
     { color: '#93B0AC', label: 'social' },
@@ -12,10 +12,10 @@ document.addEventListener("DOMContentLoaded", () => {
   ];
 
   const themes = {
-    pink: '#ffeef2',
+    pink: '#ffe7f5',
     green: '#e7f8ee',
     lavender: '#f6e5fc',
-    blue: '#e0f0ff'
+    blue: '#daece1'
   };
 
   const sparkleGifURL = "https://i.pinimg.com/originals/9e/04/6b/9e046bd40cd5e178205311426057de98.gif";
