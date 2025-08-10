@@ -26,7 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentThemeCircle = document.querySelector('.current-theme-circle');
   const themeOptions = document.querySelector('.theme-options');
 
-  // Weekly reset key for storage
+  let moodMenu = null; // reference to open mood menu
+  let weekKey = getWeekKey();
+  let moodData = JSON.parse(localStorage.getItem(weekKey)) || {};
+
+  // Get current week key for weekly reset
   function getWeekKey() {
     const date = new Date();
     const firstJan = new Date(date.getFullYear(), 0, 1);
@@ -35,26 +39,58 @@ document.addEventListener("DOMContentLoaded", () => {
     return `mood-week-${weekNumber}-${date.getFullYear()}`;
   }
 
-  let weekKey = getWeekKey();
-  let moodData = JSON.parse(localStorage.getItem(weekKey)) || {};
-
-  // Save mood selection for day
+  // Save mood for a day
   function saveMood(day, mood) {
     moodData[day] = mood;
     localStorage.setItem(weekKey, JSON.stringify(moodData));
   }
 
-  // Build mood option elements for menu
-  function createMoodMenu(dayCell) {
-    // Remove existing menu if any
-    const existingMenu = dayCell.querySelector('.mood-menu');
-    if (existingMenu) {
-      existingMenu.remove();
+  // Close both menus
+  function closeAllMenus() {
+    if (moodMenu) {
+      moodMenu.remove();
+      moodMenu = null;
+    }
+    themeOptions.classList.add('hidden');
+  }
+
+  // Update a day cell to show mood
+  function updateDayCell(cell, mood) {
+    const content = cell.querySelector('.day-content');
+    content.innerHTML = '';
+
+    if (!mood) {
+      content.textContent = '+';
+      content.style.backgroundColor = '#f2f2f2';
       return;
     }
 
-    const menu = document.createElement('div');
-    menu.className = 'mood-menu';
+    content.style.backgroundColor = mood.color;
+
+    if (mood.label === 'awesome') {
+      const img = document.createElement('img');
+      img.src = sparkleGifURL;
+      img.alt = 'sparkle';
+      img.style.width = '20px';
+      img.style.height = '20px';
+      img.style.marginRight = '4px';
+      img.style.verticalAlign = 'middle';
+      content.appendChild(img);
+    }
+
+    const text = document.createElement('span');
+    text.textContent = mood.label;
+    text.style.fontSize = '12px';
+    text.style.color = '#444';
+    content.appendChild(text);
+  }
+
+  // Create mood menu centered inside widget
+  function createMoodMenu(dayCell) {
+    closeAllMenus();
+
+    moodMenu = document.createElement('div');
+    moodMenu.className = 'mood-menu';
 
     moods.forEach(mood => {
       const option = document.createElement('div');
@@ -75,51 +111,26 @@ document.addEventListener("DOMContentLoaded", () => {
         e.stopPropagation();
         saveMood(dayCell.dataset.day, mood);
         updateDayCell(dayCell, mood);
-        menu.remove();
+        closeAllMenus();
       });
 
-      menu.appendChild(option);
+      moodMenu.appendChild(option);
     });
 
-   widgetBox.appendChild(menu);
+    widgetBox.appendChild(moodMenu);
 
-// Store reference to which day this menu belongs to (for positioning & closing)
-menu.dataset.day = dayCell.dataset.day;
-
+    // Center the mood menu inside the widget
+    moodMenu.style.position = 'absolute';
+    moodMenu.style.top = '50%';
+    moodMenu.style.left = '50%';
+    moodMenu.style.transform = 'translate(-50%, -50%)';
+    moodMenu.style.zIndex = '10';
   }
 
-  // Update a day cell's display based on selected mood or empty
-  function updateDayCell(cell, mood) {
-    const content = cell.querySelector('.day-content');
-    content.innerHTML = ''; // Clear content
-
-    if (!mood) {
-      // Show plus sign if no mood
-      content.textContent = '+';
-      content.style.backgroundColor = '#f2f2f2';
-      return;
-    }
-
-    // Set background color
-    content.style.backgroundColor = mood.color;
-
-    // If awesome mood, add sparkle gif
-    if (mood.label === 'awesome') {
-      const img = document.createElement('img');
-      img.src = sparkleGifURL;
-      img.alt = 'sparkle';
-      content.appendChild(img);
-    }
-
-    // Mood label text
-    const text = document.createElement('div');
-    text.textContent = mood.label;
-    content.appendChild(text);
-  }
-
-  // Create grid with days and current moods loaded
+  // Build the mood grid with days
   function createGrid() {
     grid.innerHTML = '';
+
     days.forEach(day => {
       const cell = document.createElement('div');
       cell.className = 'day-cell';
@@ -135,45 +146,21 @@ menu.dataset.day = dayCell.dataset.day;
       cell.appendChild(label);
       cell.appendChild(content);
 
-      // Load saved mood or default "+"
       if (moodData[day]) {
         updateDayCell(cell, moodData[day]);
       } else {
         updateDayCell(cell, null);
       }
 
-      // On click toggle mood menu
       cell.addEventListener('click', e => {
         e.stopPropagation();
-        closeAllMenus();
         createMoodMenu(cell);
+        themeOptions.classList.add('hidden'); // close theme selector if open
       });
 
       grid.appendChild(cell);
     });
   }
-
-  // Close any open mood menus on clicking outside
-  function closeAllMenus() {
-    document.querySelectorAll('.mood-menu').forEach(menu => menu.remove());
-  }
-
-  // Theme selector toggling
-  themeSelector.addEventListener('click', e => {
-    e.stopPropagation();
-    themeOptions.classList.toggle('hidden');
-  });
-
-  // Change theme when selecting a theme circle
-  themeOptions.querySelectorAll('.theme-option-circle').forEach(option => {
-   option.addEventListener('click', e => {
-  e.stopPropagation();
-  saveMood(menu.dataset.day, mood);
-  updateDayCell(document.querySelector(`.day-cell[data-day="${menu.dataset.day}"]`), mood);
-  menu.remove();
-});
-
-  });
 
   // Load saved theme or default pink
   function loadTheme() {
@@ -182,14 +169,53 @@ menu.dataset.day = dayCell.dataset.day;
     currentThemeCircle.style.backgroundColor = themes[savedTheme];
   }
 
-  // Close menus if clicking outside widget
-  document.body.addEventListener('click', () => {
+  // Set theme and save to localStorage
+  function setTheme(theme) {
+    widgetBox.className = 'widget';
+    widgetBox.classList.add(`theme-${theme}`);
+    currentThemeCircle.style.backgroundColor = themes[theme];
+    localStorage.setItem('mood-theme', theme);
+  }
+
+  // Setup theme options circles dynamically
+  function setupThemeOptions() {
+    themeOptions.innerHTML = '';
+    Object.entries(themes).forEach(([theme, color]) => {
+      const circle = document.createElement('div');
+      circle.className = 'theme-option-circle';
+      circle.style.backgroundColor = color;
+      circle.title = theme;
+
+      circle.addEventListener('click', e => {
+        e.stopPropagation();
+        setTheme(theme);
+        themeOptions.classList.add('hidden');
+        closeAllMenus();
+      });
+
+      themeOptions.appendChild(circle);
+    });
+  }
+
+  // Toggle theme options dropdown
+  currentThemeCircle.addEventListener('click', e => {
+    e.stopPropagation();
+    const isHidden = themeOptions.classList.contains('hidden');
     closeAllMenus();
-    themeOptions.classList.add('hidden');
+    if (isHidden) {
+      themeOptions.classList.remove('hidden');
+    } else {
+      themeOptions.classList.add('hidden');
+    }
   });
 
-  // On load
+  // Clicking outside closes menus
+  document.body.addEventListener('click', () => {
+    closeAllMenus();
+  });
+
+  // Initialize
+  setupThemeOptions();
   loadTheme();
   createGrid();
 });
-
