@@ -7,21 +7,22 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="widget" id="widget-box">
+  <div class="widget theme-pink" id="widget-box">
     <div class="widget-header">
       <h1>mood tracker</h1>
-      <div class="theme-selector">
-        <div class="current-theme-circle" title="change theme"></div>
+      <div class="theme-selector" title="change theme">
+        <div class="current-theme-circle"></div>
         <div class="theme-options hidden">
-          <div class="theme-option-circle" data-theme="pink" style="background-color:#ffeef2"></div>
-          <div class="theme-option-circle" data-theme="green" style="background-color:#e7f8ee"></div>
-          <div class="theme-option-circle" data-theme="lavender" style="background-color:#f3e8ff"></div>
-          <div class="theme-option-circle" data-theme="blue" style="background-color:#e0f0ff"></div>
+          <div class="theme-option-circle" data-theme="pink" style="background:#ffeef2"></div>
+          <div class="theme-option-circle" data-theme="green" style="background:#e7f8ee"></div>
+          <div class="theme-option-circle" data-theme="lavender" style="background:#f3e8ff"></div>
+          <div class="theme-option-circle" data-theme="blue" style="background:#e0f0ff"></div>
         </div>
       </div>
     </div>
     <div class="grid" id="mood-grid"></div>
   </div>
+
   <script src="mood-tracker.js"></script>
 </body>
 </html>
