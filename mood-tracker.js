@@ -83,4 +83,52 @@ document.addEventListener("DOMContentLoaded", () => {
             e.stopPropagation();
             content.style.backgroundColor = mood.color;
             content.innerHTML = `<div>${mood.label}</div>`;
-            saveMood(day,
+            saveMood(day, { color: mood.color, label: mood.label });
+            menu.remove();
+          });
+
+          menu.appendChild(option);
+        });
+
+        widgetBox.appendChild(menu);
+      });
+
+      grid.appendChild(cell);
+    });
+  }
+
+  // Theme logic
+  function setTheme(theme) {
+    widgetBox.className = 'widget';
+    widgetBox.classList.add(`theme-${theme}`);
+    currentThemeCircle.style.backgroundColor = themes[theme];
+    localStorage.setItem("selected-theme", theme);
+  }
+
+  // Load saved theme
+  const savedTheme = localStorage.getItem("selected-theme") || "pink";
+  setTheme(savedTheme);
+
+  // Handle dropdown toggle
+  currentThemeCircle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    themeOptions.classList.toggle("hidden");
+  });
+
+  // Hide dropdown if clicking elsewhere
+  document.addEventListener("click", () => {
+    themeOptions.classList.add("hidden");
+  });
+
+  // Click on theme color
+  document.querySelectorAll(".theme-option-circle").forEach(circle => {
+    circle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const theme = circle.dataset.theme;
+      setTheme(theme);
+      themeOptions.classList.add("hidden");
+    });
+  });
+
+  createGrid();
+});
