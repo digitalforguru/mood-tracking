@@ -22,8 +22,17 @@
     </div>
     <div class="grid" id="mood-grid"></div>
     
-  <!-- 🌟 RESET BUTTON GOES HERE -->
+ <!-- Reset button -->
   <button id="reset-button" class="reset-btn">reset</button>
+
+  <!-- Reset confirmation popup -->
+  <div id="reset-popup" class="reset-popup hidden">
+    <p>reset all moods?</p>
+    <div class="reset-actions">
+      <button id="confirm-reset" class="confirm-btn">yes</button>
+      <button id="cancel-reset" class="cancel-btn">no</button>
+    </div>
+  </div>
 </div>
 
   <script src="mood-tracker.js"></script>
