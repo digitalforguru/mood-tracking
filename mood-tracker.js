@@ -1,20 +1,20 @@
 document.addEventListener("DOMContentLoaded", () => {
   const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const moods = [
-    { color: '#FFF5B7', label: 'good' },
-    { color: '#FCD5CE', label: 'loved' },
-    { color: '#C3DDFD', label: 'rough' },
-    { color: '#E6E6FA', label: 'calm' },
-    { color: '#FFDACC', label: 'social' },
-    { color: '#C4F1F9', label: 'focused' },
-    { color: '#D3D3D3', label: 'meh' },
-    { color: '#FFC0CB', label: 'awesome' }
+    { color: '#FEF1C8', label: 'good' },
+    { color: '#F7E0E4', label: 'loved' },
+    { color: '#C3C2D5', label: 'rough' },
+    { color: '#C4DADE', label: 'calm' },
+    { color: '#93B0AC', label: 'social' },
+    { color: '#DCC3B4', label: 'hectic' },
+    { color: '#E7D9CC', label: 'meh' },
+    { color: '#FFA5C5', label: 'awesome' }
   ];
 
   const themes = {
     pink: '#ffeef2',
     green: '#e7f8ee',
-    lavender: '#f3e8ff',
+    lavender: '#f6e5fc',
     blue: '#e0f0ff'
   };
 
