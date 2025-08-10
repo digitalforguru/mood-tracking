@@ -196,14 +196,28 @@ document.addEventListener("DOMContentLoaded", () => {
       themeOptions.appendChild(circle);
     });
   }
-// RESET BUTTON LOGIC
-document.getElementById('reset-button').addEventListener('click', () => {
-  if (confirm("reset all moods?")) {
-    localStorage.removeItem(weekKey);
+  // Reset button functionality
+  const resetButton = document.getElementById('reset-button');
+  const resetPopup = document.getElementById('reset-popup');
+  const confirmReset = document.getElementById('confirm-reset');
+  const cancelReset = document.getElementById('cancel-reset');
+
+  resetButton.addEventListener('click', (e) => {
+    e.stopPropagation();
+    resetPopup.classList.remove('hidden');
+  });
+
+  confirmReset.addEventListener('click', () => {
     moodData = {};
-    createGrid(); // Rebuild grid with no moods
-  }
-});
+    localStorage.removeItem(weekKey);
+    createGrid(); // Rebuild grid after reset
+    resetPopup.classList.add('hidden');
+  });
+
+  cancelReset.addEventListener('click', () => {
+    resetPopup.classList.add('hidden');
+  });
+
 
   // Toggle theme options dropdown
   currentThemeCircle.addEventListener('click', e => {
