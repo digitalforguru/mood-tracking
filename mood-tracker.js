@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const grid = document.getElementById('mood-grid');
   const widgetBox = document.getElementById('widget-box');
+  const sparkleGif = "https://i.pinimg.com/originals/a0/46/42/a046426ae8ff112ca886241a9acd70a9.gif"; // cute sparkle
   const currentThemeCircle = document.querySelector('.current-theme-circle');
   const themeOptions = document.querySelector('.theme-options');
 
@@ -52,9 +53,20 @@ document.addEventListener("DOMContentLoaded", () => {
       content.className = 'day-content';
 
       if (moodData[day]) {
-        content.style.backgroundColor = moodData[day].color;
-        content.innerHTML = `<div>${moodData[day].label}</div>`;
-      }
+  content.style.backgroundColor = mood.color;
+
+if (mood.label === "awesome") {
+  content.innerHTML = `
+    <div>${mood.label}</div>
+    <img src="${sparkleGif}" class="sparkle-gif" />
+  `;
+} else {
+  content.innerHTML = `<div>${mood.label}</div>`;
+}
+} else {
+  content.innerHTML = `<div class="plus-sign">+</div>`;
+}
+
 
       cell.appendChild(label);
       cell.appendChild(content);
