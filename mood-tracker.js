@@ -196,6 +196,14 @@ document.addEventListener("DOMContentLoaded", () => {
       themeOptions.appendChild(circle);
     });
   }
+// RESET BUTTON LOGIC
+document.getElementById('reset-button').addEventListener('click', () => {
+  if (confirm("reset all moods?")) {
+    localStorage.removeItem(weekKey);
+    moodData = {};
+    createGrid(); // Rebuild grid with no moods
+  }
+});
 
   // Toggle theme options dropdown
   currentThemeCircle.addEventListener('click', e => {
