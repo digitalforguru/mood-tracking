@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@300&display=swap');
 
-:root {
-  --text: #333;
-}
-
 body {
   margin: 0;
   font-family: 'Work Sans', sans-serif;
@@ -11,13 +7,14 @@ body {
   display: flex;
   justify-content: center;
   font-size: 14px;
-  color: var(--text);
+  color: #333;
   text-transform: lowercase;
+  user-select: none;
 }
 
 .widget {
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   max-width: 350px;
   background-color: #ffeef2;
@@ -27,7 +24,6 @@ body {
   box-sizing: border-box;
   margin: 20px auto;
   text-align: center;
-  user-select: none;
 }
 
 .widget-header {
@@ -41,7 +37,6 @@ body {
   margin: 0;
   font-weight: 300;
   font-size: 20px;
-  text-transform: lowercase;
 }
 
 .theme-selector {
@@ -50,10 +45,11 @@ body {
 }
 
 .current-theme-circle {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 1.5px solid #ccc;
+  background: #ffeef2; /* default pink */
   transition: border-color 0.3s;
 }
 
@@ -63,7 +59,7 @@ body {
 
 .theme-options {
   position: absolute;
-  top: 24px;
+  top: 28px;
   right: 0;
   background: white;
   border: 1px solid #ddd;
@@ -74,6 +70,7 @@ body {
   gap: 6px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   z-index: 10000;
+  width: 40px;
 }
 
 .theme-options.hidden {
@@ -81,8 +78,8 @@ body {
 }
 
 .theme-option-circle {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   border: 1.5px solid #ccc;
   cursor: pointer;
@@ -103,7 +100,7 @@ body {
   position: relative;
   background-color: #f2f2f2;
   border-radius: 8px;
-  height: 60px;
+  height: 70px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -117,8 +114,8 @@ body {
   position: absolute;
   top: 4px;
   font-size: 10px;
-  color: var(--text);
-  text-transform: lowercase;
+  color: #333;
+  font-weight: 400;
 }
 
 .day-content {
@@ -132,15 +129,15 @@ body {
   font-size: 12px;
   color: #333;
   font-weight: 500;
-  text-transform: lowercase;
-  padding: 2px;
+  padding: 2px 0 0 0;
 }
 
 .day-content img {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   margin-bottom: 2px;
   border-radius: 6px;
+  pointer-events: none;
 }
 
 .mood-menu {
@@ -157,10 +154,11 @@ body {
   gap: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   z-index: 1000;
-  max-width: 300px;
+  max-width: 320px;
   max-height: 200px;
   overflow-y: auto;
   box-sizing: border-box;
+  user-select: none;
 }
 
 .mood-option {
@@ -181,6 +179,7 @@ body {
   height: 20px;
   border-radius: 50%;
   border: 1px solid #ccc;
+  pointer-events: none;
 }
 
 .mood-color:hover {
@@ -192,12 +191,15 @@ body {
 .theme-pink {
   background-color: #ffeef2;
 }
+
 .theme-green {
   background-color: #e7f8ee;
 }
+
 .theme-lavender {
   background-color: #f3e8ff;
 }
+
 .theme-blue {
   background-color: #e0f0ff;
 }
