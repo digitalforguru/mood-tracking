@@ -2,9 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const grid = document.getElementById('mood-grid');
   const widgetBox = document.getElementById('widget-box');
-  const sparkleGif = "https://i.pinimg.com/originals/a0/46/42/a046426ae8ff112ca886241a9acd70a9.gif"; // cute sparkle
-  const currentThemeCircle = document.querySelector('.current-theme-circle');
-  const themeOptions = document.querySelector('.theme-options');
+  const gifURL = "https://i.pinimg.com/originals/9e/04/6b/9e046bd40cd5e178205311426057de98.gif";
 
   const moods = [
     { color: '#FFF5B7', label: 'good' },
@@ -25,10 +23,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function getWeekKey() {
-    const now = new Date();
-    const start = new Date(now.getFullYear(), 0, 1);
-    const week = Math.ceil((((now - start) / 86400000) + start.getDay() + 1) / 7);
-    return `mood-week-${week}-${now.getFullYear()}`;
+    const date = new Date();
+    const onejan = new Date(date.getFullYear(), 0, 1);
+    const week = Math.ceil((((date - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+    return `mood-week-${week}-${date.getFullYear()}`;
   }
 
   const weekKey = getWeekKey();
@@ -48,99 +46,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const label = document.createElement('div');
       label.className = 'day-label';
       label.textContent = day;
+      cell.appendChild(label);
 
       const content = document.createElement('div');
-      content.className = 'day-content';
-
-      if (moodData[day]) {
-  content.style.backgroundColor = mood.color;
-
-if (mood.label === "awesome") {
-  content.innerHTML = `
-    <div>${mood.label}</div>
-    <img src="${sparkleGif}" class="sparkle-gif" />
-  `;
-} else {
-  content.innerHTML = `<div>${mood.label}</div>`;
-}
-} else {
-  content.innerHTML = `<div class="plus-sign">+</div>`;
-}
-
-
-      cell.appendChild(label);
-      cell.appendChild(content);
-
-      cell.addEventListener('click', () => {
-        document.querySelectorAll('.mood-menu').forEach(m => m.remove());
-
-        const menu = document.createElement('div');
-        menu.className = 'mood-menu';
-
-        moods.forEach(mood => {
-          const option = document.createElement('div');
-          option.className = 'mood-option';
-
-          const colorCircle = document.createElement('div');
-          colorCircle.className = 'mood-color';
-          colorCircle.style.backgroundColor = mood.color;
-
-          const moodLabel = document.createElement('span');
-          moodLabel.textContent = mood.label;
-
-          option.appendChild(colorCircle);
-          option.appendChild(moodLabel);
-
-          option.addEventListener('click', (e) => {
-            e.stopPropagation();
-            content.style.backgroundColor = mood.color;
-            content.innerHTML = `<div>${mood.label}</div>`;
-            saveMood(day, { color: mood.color, label: mood.label });
-            menu.remove();
-          });
-
-          menu.appendChild(option);
-        });
-
-        widgetBox.appendChild(menu);
-      });
-
-      grid.appendChild(cell);
-    });
-  }
-
-  // Theme logic
-  function setTheme(theme) {
-    widgetBox.className = 'widget';
-    widgetBox.classList.add(`theme-${theme}`);
-    currentThemeCircle.style.backgroundColor = themes[theme];
-    localStorage.setItem("selected-theme", theme);
-  }
-
-  // Load saved theme
-  const savedTheme = localStorage.getItem("selected-theme") || "pink";
-  setTheme(savedTheme);
-
-  // Handle dropdown toggle
-  currentThemeCircle.addEventListener("click", (e) => {
-    e.stopPropagation();
-    themeOptions.classList.toggle("hidden");
-  });
-
-  // Hide dropdown if clicking elsewhere
-  document.addEventListener("click", () => {
-    themeOptions.classList.add("hidden");
-  });
-
-  // Click on theme color
-  document.querySelectorAll(".theme-option-circle").forEach(circle => {
-    circle.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const theme = circle.dataset.theme;
-      setTheme(theme);
-      themeOptions.classList.add("hidden");
-    });
-  });
-
-  createGrid();
-});
