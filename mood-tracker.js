@@ -135,42 +135,69 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Build the mood grid
-  function createGrid() {
-    grid.innerHTML = '';
+ // --- inside createGrid(), update for weekday + date ---
+function createGrid() {
+  grid.innerHTML = '';
 
-    const weekDates = getWeekDates();
+  const weekDates = getWeekDates(); // { day: 'mon', dateKey: 'YYYY-MM-DD' }
 
-    weekDates.forEach(({ day, dateKey }) => {
-      const cell = document.createElement('div');
-      cell.className = 'day-cell';
-      cell.dataset.day = day;
-      cell.dataset.date = dateKey;
+  weekDates.forEach(({ day, dateKey }) => {
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    cell.dataset.day = day;
+    cell.dataset.date = dateKey;
 
-      const label = document.createElement('div');
-      label.className = 'day-label';
-      label.textContent = day;
+    const label = document.createElement('div');
+    label.className = 'day-label';
+    const dateObj = new Date(dateKey);
+    const month = dateObj.getMonth() + 1;
+    const date = dateObj.getDate();
+    label.textContent = `${day} ${month}/${date}`; // Mon 12/03
 
-      const content = document.createElement('div');
-      content.className = 'day-content';
+    const content = document.createElement('div');
+    content.className = 'day-content';
 
-      cell.appendChild(label);
-      cell.appendChild(content);
+    cell.appendChild(label);
+    cell.appendChild(content);
 
-      // Load mood if saved
-      if (moodLog[dateKey]) {
-        updateDayCell(cell, moodLog[dateKey]);
-      } else {
-        updateDayCell(cell, null);
-      }
+    if (moodLog[dateKey]) {
+      updateDayCell(cell, moodLog[dateKey]);
+    } else {
+      updateDayCell(cell, null);
+    }
 
-      cell.addEventListener('click', e => {
-        e.stopPropagation();
-        createMoodMenu(cell, dateKey);
-        themeOptions.classList.add('hidden'); // close theme selector
-      });
-
-      grid.appendChild(cell);
+    cell.addEventListener('click', e => {
+      e.stopPropagation();
+      createMoodMenu(cell, dateKey);
+      themeOptions.classList.add('hidden'); // close theme selector
     });
+
+    grid.appendChild(cell);
+  });
+}
+
+// --- Mood Log Viewer ---
+const viewLogBtn = document.getElementById('view-log-btn');
+const moodLogPopup = document.getElementById('mood-log-popup');
+const logEntriesDiv = document.getElementById('log-entries');
+const closeLogBtn = document.getElementById('close-log-btn');
+
+viewLogBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  logEntriesDiv.innerHTML = '';
+  const entries = Object.entries(moodLog)
+    .sort((a,b) => new Date(a[0]) - new Date(b[0])); // sort by date
+  entries.forEach(([date, mood]) => {
+    const div = document.createElement('div');
+    div.innerHTML = `<span>${date}</span><span style="background:${mood.color};border-radius:50%;width:12px;height:12px;display:inline-block;margin-left:6px;"></span> ${mood.label}`;
+    logEntriesDiv.appendChild(div);
+  });
+  moodLogPopup.classList.remove('hidden');
+});
+
+closeLogBtn.addEventListener('click', e => {
+  moodLogPopup.classList.add('hidden');
+});
   }
 
   // Load saved theme or default pink
