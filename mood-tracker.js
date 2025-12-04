@@ -198,7 +198,7 @@ viewLogBtn.addEventListener('click', e => {
 closeLogBtn.addEventListener('click', e => {
   moodLogPopup.classList.add('hidden');
 });
-  }
+  
 
   // Load saved theme or default pink
   function loadTheme() {
