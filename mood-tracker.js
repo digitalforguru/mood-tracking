@@ -27,22 +27,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeOptions = document.querySelector('.theme-options');
 
   let moodMenu = null; // reference to open mood menu
-  let weekKey = getWeekKey();
-  let moodData = JSON.parse(localStorage.getItem(weekKey)) || {};
 
-  // Get current week key for weekly reset
-  function getWeekKey() {
-    const date = new Date();
-    const firstJan = new Date(date.getFullYear(), 0, 1);
-    const pastDaysOfYear = (date - firstJan) / 86400000;
-    const weekNumber = Math.ceil((pastDaysOfYear + firstJan.getDay() + 1) / 7);
-    return `mood-week-${weekNumber}-${date.getFullYear()}`;
-  }
+  // ====== NEW: persistent log keyed by date ======
+  let moodLog = JSON.parse(localStorage.getItem('mood-log')) || {};
 
-  // Save mood for a day
-  function saveMood(day, mood) {
-    moodData[day] = mood;
-    localStorage.setItem(weekKey, JSON.stringify(moodData));
+  // Save mood for a specific date
+  function saveMood(dateKey, mood) {
+    moodLog[dateKey] = mood;
+    localStorage.setItem('mood-log', JSON.stringify(moodLog));
   }
 
   // Close both menus
@@ -86,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Create mood menu centered inside widget
-  function createMoodMenu(dayCell) {
+  function createMoodMenu(dayCell, dateKey) {
     closeAllMenus();
 
     moodMenu = document.createElement('div');
@@ -109,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       option.addEventListener('click', e => {
         e.stopPropagation();
-        saveMood(dayCell.dataset.day, mood);
+        saveMood(dateKey, mood);
         updateDayCell(dayCell, mood);
         closeAllMenus();
       });
@@ -119,7 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     widgetBox.appendChild(moodMenu);
 
-    // Center the mood menu inside the widget
     moodMenu.style.position = 'absolute';
     moodMenu.style.top = '50%';
     moodMenu.style.left = '50%';
@@ -127,14 +118,33 @@ document.addEventListener("DOMContentLoaded", () => {
     moodMenu.style.zIndex = '10';
   }
 
-  // Build the mood grid with days
+  // ====== NEW: Get current week's dates ======
+  function getWeekDates() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0-6 (Sun-Sat)
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - dayOfWeek);
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(startOfWeek);
+      d.setDate(startOfWeek.getDate() + i);
+      const key = d.toISOString().split('T')[0]; // YYYY-MM-DD
+      weekDates.push({ day: days[i], dateKey: key });
+    }
+    return weekDates;
+  }
+
+  // Build the mood grid
   function createGrid() {
     grid.innerHTML = '';
 
-    days.forEach(day => {
+    const weekDates = getWeekDates();
+
+    weekDates.forEach(({ day, dateKey }) => {
       const cell = document.createElement('div');
       cell.className = 'day-cell';
       cell.dataset.day = day;
+      cell.dataset.date = dateKey;
 
       const label = document.createElement('div');
       label.className = 'day-label';
@@ -146,16 +156,17 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.appendChild(label);
       cell.appendChild(content);
 
-      if (moodData[day]) {
-        updateDayCell(cell, moodData[day]);
+      // Load mood if saved
+      if (moodLog[dateKey]) {
+        updateDayCell(cell, moodLog[dateKey]);
       } else {
         updateDayCell(cell, null);
       }
 
       cell.addEventListener('click', e => {
         e.stopPropagation();
-        createMoodMenu(cell);
-        themeOptions.classList.add('hidden'); // close theme selector if open
+        createMoodMenu(cell, dateKey);
+        themeOptions.classList.add('hidden'); // close theme selector
       });
 
       grid.appendChild(cell);
@@ -169,7 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
     currentThemeCircle.style.backgroundColor = themes[savedTheme];
   }
 
-  // Set theme and save to localStorage
   function setTheme(theme) {
     widgetBox.className = 'widget';
     widgetBox.classList.add(`theme-${theme}`);
@@ -177,7 +187,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem('mood-theme', theme);
   }
 
-  // Setup theme options circles dynamically
   function setupThemeOptions() {
     themeOptions.innerHTML = '';
     Object.entries(themes).forEach(([theme, color]) => {
@@ -196,7 +205,8 @@ document.addEventListener("DOMContentLoaded", () => {
       themeOptions.appendChild(circle);
     });
   }
-  // Reset button functionality
+
+  // Reset functionality
   const resetButton = document.getElementById('reset-button');
   const resetPopup = document.getElementById('reset-popup');
   const confirmReset = document.getElementById('confirm-reset');
@@ -208,9 +218,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   confirmReset.addEventListener('click', () => {
-    moodData = {};
-    localStorage.removeItem(weekKey);
-    createGrid(); // Rebuild grid after reset
+    moodLog = {};
+    localStorage.removeItem('mood-log');
+    createGrid();
     resetPopup.classList.add('hidden');
   });
 
@@ -218,23 +228,15 @@ document.addEventListener("DOMContentLoaded", () => {
     resetPopup.classList.add('hidden');
   });
 
-
-  // Toggle theme options dropdown
+  // Toggle theme dropdown
   currentThemeCircle.addEventListener('click', e => {
     e.stopPropagation();
     const isHidden = themeOptions.classList.contains('hidden');
     closeAllMenus();
-    if (isHidden) {
-      themeOptions.classList.remove('hidden');
-    } else {
-      themeOptions.classList.add('hidden');
-    }
+    if (isHidden) themeOptions.classList.remove('hidden');
   });
 
-  // Clicking outside closes menus
-  document.body.addEventListener('click', () => {
-    closeAllMenus();
-  });
+  document.body.addEventListener('click', () => closeAllMenus());
 
   // Initialize
   setupThemeOptions();
