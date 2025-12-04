@@ -23,7 +23,26 @@
     <div class="grid" id="mood-grid"></div>
     
  <!-- Reset button -->
-  <button id="reset-button" class="reset-btn">reset</button>
+<button id="reset-button" class="reset-btn">reset</button>
+
+<!-- View Mood Log button -->
+<button id="view-log-btn" class="reset-btn">view log</button>
+
+<!-- Reset confirmation popup -->
+<div id="reset-popup" class="reset-popup hidden">
+  <p>reset all moods?</p>
+  <div class="reset-actions">
+    <button id="confirm-reset" class="confirm-btn">yes</button>
+    <button id="cancel-reset" class="cancel-btn">no</button>
+  </div>
+</div>
+
+<!-- Mood Log Popup -->
+<div id="mood-log-popup" class="reset-popup hidden">
+  <h3>mood log</h3>
+  <div id="log-entries" style="max-height:180px; overflow-y:auto; text-align:left; font-size:12px;"></div>
+  <button id="close-log-btn" class="confirm-btn" style="margin-top:8px; width:100%;">close</button>
+</div>
 
   <!-- Reset confirmation popup -->
   <div id="reset-popup" class="reset-popup hidden">
