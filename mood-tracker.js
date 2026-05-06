@@ -7,7 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const grid = document.getElementById("mood-grid");
 
   const themeSelector = document.querySelector(".theme-selector");
-  const themeOptions = document.querySelector(".theme-options");
+  const themeOptions = document.getElementById("themeOptions");
+  const themeCircles = document.querySelectorAll(".theme-circle");
   const currentThemeCircle = document.querySelector(".current-theme-circle");
 
   const fontToggle = document.getElementById("fontToggle");
@@ -28,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyMsg = document.getElementById("copyMessage");
 
   /* =========================
-     STATE (URL BASED)
+     URL STATE (SOURCE OF TRUTH)
   ========================= */
   const params = new URLSearchParams(window.location.search);
 
@@ -48,6 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
     blue: "#dceaf5"
   };
 
+  /* =========================
+     MOODS
+  ========================= */
   const moods = [
     { color: "#FEF1C8", label: "good" },
     { color: "#FFA7A6", label: "loved" },
@@ -65,9 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let moodMenu = null;
 
   /* =========================
-     APPLY THEME
+     THEME APPLY
   ========================= */
   function applyTheme(theme) {
+    if (!widgetBox) return;
     widgetBox.className = `widget theme-${theme}`;
     if (currentThemeCircle) {
       currentThemeCircle.style.backgroundColor = themes[theme];
@@ -75,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     APPLY FONT (SCOPED ONLY)
+     FONT APPLY (SCOPED ONLY)
   ========================= */
   function applyFont(font) {
     let fontFamily =
@@ -89,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     WEEK GENERATION
+     WEEK BUILDER
   ========================= */
   function getWeekDates() {
     const today = new Date();
@@ -108,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     MOOD SAVE
+     SAVE MOOD
   ========================= */
   function saveMood(key, mood) {
     moodLog[key] = mood;
@@ -116,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     CELL RENDER
+     RENDER CELL
   ========================= */
   function renderCell(cell, mood) {
     const content = cell.querySelector(".day-content");
@@ -139,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     CLOSE MENUS
+     CLOSE ALL MENUS
   ========================= */
   function closeMenus() {
     moodMenu?.remove();
@@ -161,22 +166,22 @@ document.addEventListener("DOMContentLoaded", () => {
     moodMenu.className = "mood-menu";
 
     moods.forEach(m => {
-      const option = document.createElement("div");
-      option.className = "mood-option";
+      const el = document.createElement("div");
+      el.className = "mood-option";
 
-      option.innerHTML = `
+      el.innerHTML = `
         <div class="mood-color" style="background:${m.color}"></div>
         <div>${m.label}</div>
       `;
 
-      option.onclick = (e) => {
+      el.onclick = (e) => {
         e.stopPropagation();
         saveMood(key, m);
         renderCell(cell, m);
         closeMenus();
       };
 
-      moodMenu.appendChild(option);
+      moodMenu.appendChild(el);
     });
 
     widgetBox.appendChild(moodMenu);
@@ -216,10 +221,11 @@ document.addEventListener("DOMContentLoaded", () => {
     themeOptions.classList.toggle("hidden");
   });
 
-  themeOptions?.addEventListener("click", (e) => {
-    if (e.target.dataset.theme) {
-      applyTheme(e.target.dataset.theme);
-    }
+  themeCircles.forEach(circle => {
+    circle.addEventListener("click", () => {
+      const theme = circle.dataset.theme;
+      applyTheme(theme);
+    });
   });
 
   /* =========================
@@ -276,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
-     COPY LINK
+     COPY LINK (STABLE)
   ========================= */
   copyBtn?.addEventListener("click", async () => {
     const url =
@@ -292,6 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setTimeout(() => {
       copyMsg.classList.add("hidden");
+      copyMsg.classList.remove("show");
     }, 1500);
   });
 
