@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================
-     ELEMENTS
+     ELEMENTS (SAFE MODE)
   ========================= */
   const widgetBox = document.getElementById("widget-box");
   const grid = document.getElementById("mood-grid");
@@ -16,26 +16,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const logEntries = document.getElementById("log-entries");
   const closeLogBtn = document.getElementById("close-log-btn");
 
-  const copyBtn = document.getElementById("copyLinkBtn");
-  const copyMsg = document.getElementById("copyMessage");
-
   const themeSelector = document.querySelector(".theme-selector");
   const themeOptions = document.querySelector(".theme-options");
-  const currentThemeCircle = document.querySelector(".current-theme-circle");
+
+  const copyBtn = document.getElementById("copyLinkBtn");
+  const copyMsg = document.getElementById("copyMessage");
 
   const fontToggle = document.getElementById("fontToggle");
 
   const params = new URLSearchParams(window.location.search);
 
   /* =========================
-     STATE FROM URL (SOURCE OF TRUTH)
+     URL STATE (SOURCE OF TRUTH)
   ========================= */
   function getState() {
     return {
       theme: params.get("theme") || "pink",
       font: params.get("font") || "default",
       embed: params.get("embed") === "true",
-      moods: JSON.parse(params.get("moods") || "{}") // stored as JSON in URL
+      moods: JSON.parse(params.get("moods") || "{}")
     };
   }
 
@@ -53,12 +52,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   function applyTheme(theme) {
+    if (!widgetBox) return;
     widgetBox.className = `widget theme-${theme}`;
-    currentThemeCircle.style.background = themes[theme];
   }
 
   /* =========================
-     FONT SYSTEM
+     FONT SYSTEM (FIXED)
   ========================= */
   function applyFont(font) {
     let family = "";
@@ -67,31 +66,30 @@ document.addEventListener("DOMContentLoaded", () => {
     else if (font === "mono") family = "ui-monospace, monospace";
     else family = "'Work Sans', sans-serif";
 
-    widgetBox.style.fontFamily = family;
+    document.body.style.fontFamily = family;
+    if (widgetBox) widgetBox.style.fontFamily = family;
   }
 
   /* =========================
-     SAVE TO URL (CORE SYSTEM)
+     URL BUILDER
   ========================= */
   function buildURL() {
     const base = `${location.origin}${location.pathname}`;
+    const p = new URLSearchParams();
 
-    const newParams = new URLSearchParams();
-
-    newParams.set("theme", state.theme);
-    newParams.set("font", state.font);
-    newParams.set("embed", "true");
+    p.set("theme", state.theme);
+    p.set("font", state.font);
+    p.set("embed", "true");
 
     if (Object.keys(moodData).length) {
-      newParams.set("moods", JSON.stringify(moodData));
+      p.set("moods", JSON.stringify(moodData));
     }
 
-    return `${base}?${newParams.toString()}`;
+    return `${base}?${p.toString()}`;
   }
 
-  function updateURL(replace = true) {
-    const url = buildURL();
-    if (replace) window.history.replaceState({}, "", url);
+  function updateURL() {
+    window.history.replaceState({}, "", buildURL());
   }
 
   /* =========================
@@ -125,9 +123,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     GRID BUILDER (WEEK BASED)
+     GRID
   ========================= */
   function buildGrid() {
+    if (!grid) return;
+
     grid.innerHTML = "";
 
     const today = new Date();
@@ -153,9 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setCell(cell, moodData[key]);
 
-      cell.addEventListener("click", () => {
-        openMoodMenu(cell, key);
-      });
+      cell.addEventListener("click", () => openMoodMenu(cell, key));
 
       grid.appendChild(cell);
     }
@@ -171,6 +169,7 @@ document.addEventListener("DOMContentLoaded", () => {
       activeMenu.remove();
       activeMenu = null;
     }
+
     themeOptions?.classList.add("hidden");
     resetPopup?.classList.add("hidden");
     logPopup?.classList.add("hidden");
@@ -201,28 +200,34 @@ document.addEventListener("DOMContentLoaded", () => {
       menu.appendChild(opt);
     });
 
-    widgetBox.appendChild(menu);
+    widgetBox?.appendChild(menu);
     activeMenu = menu;
   }
 
   /* =========================
-     RESET (URL-BASED)
+     RESET
   ========================= */
-  resetBtn.onclick = () => resetPopup.classList.remove("hidden");
+  resetBtn?.addEventListener("click", () => {
+    resetPopup?.classList.remove("hidden");
+  });
 
-  confirmReset.onclick = () => {
+  confirmReset?.addEventListener("click", () => {
     moodData = {};
     updateURL();
     buildGrid();
-    resetPopup.classList.add("hidden");
-  };
+    resetPopup?.classList.add("hidden");
+  });
 
-  cancelReset.onclick = () => resetPopup.classList.add("hidden");
+  cancelReset?.addEventListener("click", () => {
+    resetPopup?.classList.add("hidden");
+  });
 
   /* =========================
      VIEW LOG
   ========================= */
-  viewLogBtn.onclick = () => {
+  viewLogBtn?.addEventListener("click", () => {
+    if (!logEntries) return;
+
     logEntries.innerHTML = "";
 
     Object.entries(moodData)
@@ -230,44 +235,45 @@ document.addEventListener("DOMContentLoaded", () => {
       .forEach(([date, mood]) => {
         const div = document.createElement("div");
         div.textContent = `${date} — ${mood.label}`;
-        div.style.padding = "4px 0";
         logEntries.appendChild(div);
       });
 
-    logPopup.classList.remove("hidden");
-  };
+    logPopup?.classList.remove("hidden");
+  });
 
-  closeLogBtn.onclick = () => logPopup.classList.add("hidden");
+  closeLogBtn?.addEventListener("click", () => {
+    logPopup?.classList.add("hidden");
+  });
 
   /* =========================
-     THEME UI
+     THEME (SAFE FIX)
   ========================= */
-  themeSelector.onclick = (e) => {
-    e.stopPropagation();
-    themeOptions.classList.toggle("hidden");
-  };
+  if (themeSelector && themeOptions) {
+    themeSelector.addEventListener("click", (e) => {
+      e.stopPropagation();
+      themeOptions.classList.toggle("hidden");
+    });
+  }
 
   Object.keys(themes).forEach(t => {
     const circle = document.createElement("div");
     circle.className = "theme-option-circle";
     circle.style.background = themes[t];
 
-    circle.onclick = () => {
+    circle.addEventListener("click", () => {
       state.theme = t;
       applyTheme(t);
       updateURL();
-      themeOptions.classList.add("hidden");
-    };
+      themeOptions?.classList.add("hidden");
+    });
 
-    themeOptions.appendChild(circle);
+    themeOptions?.appendChild(circle);
   });
 
   /* =========================
-     FONT (APPLIES TO EVERYTHING)
+     FONT (SAFE + WORKING)
   ========================= */
-  fontToggle?.addEventListener("click", (e) => {
-    e.stopPropagation();
-
+  fontToggle?.addEventListener("click", () => {
     const fonts = ["default", "serif", "mono"];
     const current = state.font;
 
@@ -279,22 +285,29 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
-     COPY LINK (FULL STATE)
+     COPY LINK (FIXED)
   ========================= */
   copyBtn?.addEventListener("click", async () => {
     const url = buildURL();
 
-    await navigator.clipboard.writeText(url);
+    try {
+      await navigator.clipboard.writeText(url);
 
-    copyMsg.classList.remove("hidden");
+      if (!copyMsg) return;
 
-    setTimeout(() => {
-      copyMsg.classList.add("hidden");
-    }, 1500);
+      copyMsg.classList.remove("hidden");
+
+      setTimeout(() => {
+        copyMsg.classList.add("hidden");
+      }, 1500);
+
+    } catch (err) {
+      console.error("copy failed", err);
+    }
   });
 
   /* =========================
-     GLOBAL CLICK CLOSE
+     CLOSE ON OUTSIDE CLICK
   ========================= */
   document.body.addEventListener("click", closeMenus);
 
@@ -304,4 +317,5 @@ document.addEventListener("DOMContentLoaded", () => {
   applyTheme(state.theme);
   applyFont(state.font);
   buildGrid();
+
 });
