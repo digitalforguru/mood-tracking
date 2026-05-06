@@ -1,272 +1,246 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-  const moods = [
-    { color: '#FEF1C8', label: 'good' },
-    { color: '#FFA7A6', label: 'loved' },
-    { color: '#C3C2D5', label: 'rough' },
-    { color: '#C4DADE', label: 'calm' },
-    { color: '#93B0AC', label: 'social' },
-    { color: '#DCC3B4', label: 'hectic' },
-    { color: '#E7D9CC', label: 'meh' },
-    { color: '#FFA5C5', label: 'awesome' }
-  ];
+const widgetBox = document.getElementById("widget-box");
+const grid = document.getElementById("mood-grid");
 
-  const themes = {
-    pink: '#ffe7f5',
-    green: '#e7f8ee',
-    lavender: '#f6e5fc',
-    blue: '#daece1'
+/* =========================
+   BUILDER UI ELEMENTS
+========================= */
+const themeToggle = document.getElementById("themeToggle");
+const themeOptions = document.getElementById("themeOptions");
+
+const fontToggle = document.getElementById("fontToggle");
+const fontOptions = document.getElementById("fontOptions");
+
+const copyLinkBtn = document.getElementById("copyLinkBtn");
+const copyMessage = document.getElementById("copyMessage");
+
+const usageTip = document.getElementById("usageTip");
+
+const params = new URLSearchParams(window.location.search);
+const isEmbed = params.get("embed") === "true";
+
+/* =========================
+   EMBED MODE
+========================= */
+if (isEmbed) {
+  document.querySelector(".builder-ui")?.style.setProperty("display", "none");
+}
+
+/* =========================
+   STATE SYSTEM
+========================= */
+function getState() {
+  return {
+    theme: params.get("theme") || localStorage.getItem("userTheme") || "pink",
+    font: params.get("font") || localStorage.getItem("userFont") || "default"
   };
+}
 
-  const sparkleGifURL = "https://i.pinimg.com/originals/9e/04/6b/9e046bd40cd5e178205311426057de98.gif";
+/* =========================
+   APPLY THEME
+========================= */
+function applyTheme(theme) {
+  widgetBox.className = `widget ${theme}`;
+  localStorage.setItem("userTheme", theme);
+}
 
-  const widgetBox = document.getElementById('widget-box');
-  const grid = document.getElementById('mood-grid');
-  const themeSelector = document.querySelector('.theme-selector');
-  const currentThemeCircle = document.querySelector('.current-theme-circle');
-  const themeOptions = document.querySelector('.theme-options');
+/* =========================
+   APPLY FONT
+========================= */
+function applyFont(font) {
+  let fontFamily = "'Satoshi', sans-serif";
 
-  let moodMenu = null; // reference to open mood menu
+  if (font === "serif") fontFamily = "Georgia, serif";
+  if (font === "mono") fontFamily = "ui-monospace, monospace";
 
-  // ====== NEW: persistent log keyed by date ======
-  let moodLog = JSON.parse(localStorage.getItem('mood-log')) || {};
+  widgetBox.style.fontFamily = fontFamily;
+  localStorage.setItem("userFont", font);
+}
 
-  // Save mood for a specific date
-  function saveMood(dateKey, mood) {
-    moodLog[dateKey] = mood;
-    localStorage.setItem('mood-log', JSON.stringify(moodLog));
-  }
+/* =========================
+   INIT
+========================= */
+window.addEventListener("DOMContentLoaded", () => {
+  const state = getState();
 
-  // Close both menus
-  function closeAllMenus() {
-    if (moodMenu) {
-      moodMenu.remove();
-      moodMenu = null;
-    }
-    themeOptions.classList.add('hidden');
-  }
+  applyTheme(state.theme);
+  applyFont(state.font);
 
-  // Update a day cell to show mood
-  function updateDayCell(cell, mood) {
-    const content = cell.querySelector('.day-content');
-    content.innerHTML = '';
+  createGrid();
+});
 
-    if (!mood) {
-      content.textContent = '+';
-      content.style.backgroundColor = '#f2f2f2';
-      return;
-    }
+/* =========================
+   THEME UI
+========================= */
+themeToggle?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  themeOptions.classList.toggle("hidden");
+});
 
-    content.style.backgroundColor = mood.color;
+themeOptions?.querySelectorAll(".theme-circle").forEach(circle => {
+  circle.addEventListener("click", () => {
+    applyTheme(circle.dataset.theme);
+    themeOptions.classList.add("hidden");
+  });
+});
 
-    if (mood.label === 'awesome') {
-      const img = document.createElement('img');
-      img.src = sparkleGifURL;
-      img.alt = 'sparkle';
-      img.style.width = '20px';
-      img.style.height = '20px';
-      img.style.marginRight = '4px';
-      img.style.verticalAlign = 'middle';
-      content.appendChild(img);
-    }
+/* =========================
+   FONT UI
+========================= */
+fontToggle?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  fontOptions.classList.toggle("hidden");
+});
 
-    const text = document.createElement('span');
-    text.textContent = mood.label;
-    text.style.fontSize = '12px';
-    text.style.color = '#444';
-    content.appendChild(text);
-  }
+fontOptions?.querySelectorAll(".font-option").forEach(opt => {
+  opt.addEventListener("click", () => {
+    applyFont(opt.dataset.font);
+    fontOptions.classList.add("hidden");
+  });
+});
 
-  // Create mood menu centered inside widget
-  function createMoodMenu(dayCell, dateKey) {
-    closeAllMenus();
+/* =========================
+   MOOD SYSTEM
+========================= */
+const moods = [
+  { color: '#FEF1C8', label: 'good' },
+  { color: '#FFA7A6', label: 'loved' },
+  { color: '#C3C2D5', label: 'rough' },
+  { color: '#C4DADE', label: 'calm' },
+  { color: '#93B0AC', label: 'social' },
+  { color: '#DCC3B4', label: 'hectic' },
+  { color: '#E7D9CC', label: 'meh' },
+  { color: '#FFA5C5', label: 'awesome' }
+];
 
-    moodMenu = document.createElement('div');
-    moodMenu.className = 'mood-menu';
+const days = ["sun","mon","tue","wed","thu","fri","sat"];
 
-    moods.forEach(mood => {
-      const option = document.createElement('div');
-      option.className = 'mood-option';
-      option.title = mood.label;
+let moodLog = JSON.parse(localStorage.getItem("mood-log")) || {};
+let moodMenu = null;
 
-      const colorDot = document.createElement('div');
-      colorDot.className = 'mood-color';
-      colorDot.style.backgroundColor = mood.color;
-
-      const label = document.createElement('div');
-      label.textContent = mood.label;
-
-      option.appendChild(colorDot);
-      option.appendChild(label);
-
-      option.addEventListener('click', e => {
-        e.stopPropagation();
-        saveMood(dateKey, mood);
-        updateDayCell(dayCell, mood);
-        closeAllMenus();
-      });
-
-      moodMenu.appendChild(option);
-    });
-
-    widgetBox.appendChild(moodMenu);
-
-    moodMenu.style.position = 'absolute';
-    moodMenu.style.top = '50%';
-    moodMenu.style.left = '50%';
-    moodMenu.style.transform = 'translate(-50%, -50%)';
-    moodMenu.style.zIndex = '10';
-  }
-
-  // ====== NEW: Get current week's dates ======
-  function getWeekDates() {
-    const today = new Date();
-    const dayOfWeek = today.getDay(); // 0-6 (Sun-Sat)
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - dayOfWeek);
-    const weekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(startOfWeek);
-      d.setDate(startOfWeek.getDate() + i);
-      const key = d.toISOString().split('T')[0]; // YYYY-MM-DD
-      weekDates.push({ day: days[i], dateKey: key });
-    }
-    return weekDates;
-  }
-
-  // Build the mood grid
- // --- inside createGrid(), update for weekday + date ---
+/* =========================
+   GRID BUILD
+========================= */
 function createGrid() {
-  grid.innerHTML = '';
+  grid.innerHTML = "";
 
-  const weekDates = getWeekDates(); // { day: 'mon', dateKey: 'YYYY-MM-DD' }
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(today.getDate() - today.getDay());
 
-  weekDates.forEach(({ day, dateKey }) => {
-    const cell = document.createElement('div');
-    cell.className = 'day-cell';
-    cell.dataset.day = day;
-    cell.dataset.date = dateKey;
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
 
-    const label = document.createElement('div');
-    label.className = 'day-label';
-    const dateObj = new Date(dateKey);
-    const month = dateObj.getMonth() + 1;
-    const date = dateObj.getDate();
-    label.textContent = `${day} ${month}/${date}`; // Mon 12/03
+    const key = date.toISOString().split("T")[0];
 
-    const content = document.createElement('div');
-    content.className = 'day-content';
+    const cell = document.createElement("div");
+    cell.className = "day-cell";
+
+    const label = document.createElement("div");
+    label.className = "day-label";
+    label.textContent = `${days[i]} ${date.getMonth()+1}/${date.getDate()}`;
+
+    const content = document.createElement("div");
+    content.className = "day-content";
 
     cell.appendChild(label);
     cell.appendChild(content);
 
-    if (moodLog[dateKey]) {
-      updateDayCell(cell, moodLog[dateKey]);
+    if (moodLog[key]) {
+      content.style.backgroundColor = moodLog[key].color;
+      content.textContent = moodLog[key].label;
     } else {
-      updateDayCell(cell, null);
+      content.textContent = "+";
     }
 
-    cell.addEventListener('click', e => {
+    cell.addEventListener("click", (e) => {
       e.stopPropagation();
-      createMoodMenu(cell, dateKey);
-      themeOptions.classList.add('hidden'); // close theme selector
+      openMoodMenu(cell, content, key);
     });
 
     grid.appendChild(cell);
-  });
+  }
 }
 
-// --- Mood Log Viewer ---
-const viewLogBtn = document.getElementById('view-log-btn');
-const moodLogPopup = document.getElementById('mood-log-popup');
-const logEntriesDiv = document.getElementById('log-entries');
-const closeLogBtn = document.getElementById('close-log-btn');
+/* =========================
+   MOOD MENU
+========================= */
+function openMoodMenu(cell, content, key) {
+  if (moodMenu) moodMenu.remove();
 
-viewLogBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  logEntriesDiv.innerHTML = '';
-  const entries = Object.entries(moodLog)
-    .sort((a,b) => new Date(a[0]) - new Date(b[0])); // sort by date
-  entries.forEach(([date, mood]) => {
-    const div = document.createElement('div');
-    div.innerHTML = `<span>${date}</span><span style="background:${mood.color};border-radius:50%;width:12px;height:12px;display:inline-block;margin-left:6px;"></span> ${mood.label}`;
-    logEntriesDiv.appendChild(div);
+  moodMenu = document.createElement("div");
+  moodMenu.className = "mood-menu";
+
+  moods.forEach(mood => {
+    const btn = document.createElement("div");
+    btn.className = "mood-option";
+
+    const dot = document.createElement("div");
+    dot.className = "mood-color";
+    dot.style.background = mood.color;
+
+    const label = document.createElement("div");
+    label.textContent = mood.label;
+
+    btn.appendChild(dot);
+    btn.appendChild(label);
+
+    btn.onclick = () => {
+      moodLog[key] = mood;
+      localStorage.setItem("mood-log", JSON.stringify(moodLog));
+
+      content.style.backgroundColor = mood.color;
+      content.textContent = mood.label;
+
+      moodMenu.remove();
+    };
+
+    moodMenu.appendChild(btn);
   });
-  moodLogPopup.classList.remove('hidden');
+
+  widgetBox.appendChild(moodMenu);
+}
+
+/* =========================
+   CLOSE MENUS
+========================= */
+document.addEventListener("click", () => {
+  if (moodMenu) moodMenu.remove();
+  themeOptions?.classList.add("hidden");
+  fontOptions?.classList.add("hidden");
 });
 
-closeLogBtn.addEventListener('click', e => {
-  moodLogPopup.classList.add('hidden');
-});
-  
+/* =========================
+   COPY LINK (FULL SYSTEM)
+========================= */
+copyLinkBtn?.addEventListener("click", async () => {
+  const theme = localStorage.getItem("userTheme") || "pink";
+  const font = localStorage.getItem("userFont") || "default";
 
-  // Load saved theme or default pink
-  function loadTheme() {
-    const savedTheme = localStorage.getItem('mood-theme') || 'pink';
-    widgetBox.className = `widget theme-${savedTheme}`;
-    currentThemeCircle.style.backgroundColor = themes[savedTheme];
+  const url =
+    `${location.origin}${location.pathname}` +
+    `?theme=${theme}` +
+    `&font=${font}` +
+    `&embed=true`;
+
+  try {
+    await navigator.clipboard.writeText(url);
+
+    copyMessage.classList.add("hidden");
+    copyMessage.classList.remove("show");
+
+    void copyMessage.offsetWidth;
+
+    copyMessage.classList.remove("hidden");
+    copyMessage.classList.add("show");
+
+    clearTimeout(window.__copyTimer);
+    window.__copyTimer = setTimeout(() => {
+      copyMessage.classList.add("hidden");
+      copyMessage.classList.remove("show");
+    }, 1800);
+
+  } catch (err) {
+    console.error("copy failed", err);
   }
-
-  function setTheme(theme) {
-    widgetBox.className = 'widget';
-    widgetBox.classList.add(`theme-${theme}`);
-    currentThemeCircle.style.backgroundColor = themes[theme];
-    localStorage.setItem('mood-theme', theme);
-  }
-
-  function setupThemeOptions() {
-    themeOptions.innerHTML = '';
-    Object.entries(themes).forEach(([theme, color]) => {
-      const circle = document.createElement('div');
-      circle.className = 'theme-option-circle';
-      circle.style.backgroundColor = color;
-      circle.title = theme;
-
-      circle.addEventListener('click', e => {
-        e.stopPropagation();
-        setTheme(theme);
-        themeOptions.classList.add('hidden');
-        closeAllMenus();
-      });
-
-      themeOptions.appendChild(circle);
-    });
-  }
-
-  // Reset functionality
-  const resetButton = document.getElementById('reset-button');
-  const resetPopup = document.getElementById('reset-popup');
-  const confirmReset = document.getElementById('confirm-reset');
-  const cancelReset = document.getElementById('cancel-reset');
-
-  resetButton.addEventListener('click', (e) => {
-    e.stopPropagation();
-    resetPopup.classList.remove('hidden');
-  });
-
-  confirmReset.addEventListener('click', () => {
-    moodLog = {};
-    localStorage.removeItem('mood-log');
-    createGrid();
-    resetPopup.classList.add('hidden');
-  });
-
-  cancelReset.addEventListener('click', () => {
-    resetPopup.classList.add('hidden');
-  });
-
-  // Toggle theme dropdown
-  currentThemeCircle.addEventListener('click', e => {
-    e.stopPropagation();
-    const isHidden = themeOptions.classList.contains('hidden');
-    closeAllMenus();
-    if (isHidden) themeOptions.classList.remove('hidden');
-  });
-
-  document.body.addEventListener('click', () => closeAllMenus());
-
-  // Initialize
-  setupThemeOptions();
-  loadTheme();
-  createGrid();
 });
