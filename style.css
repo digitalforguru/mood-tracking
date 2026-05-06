@@ -154,7 +154,7 @@ body {
 
 
 /* ================= WIDGET ================= */
-.widget {
+.widget-box {
   max-width: 360px;
   margin: 0 auto 20px;
   padding: 14px;
