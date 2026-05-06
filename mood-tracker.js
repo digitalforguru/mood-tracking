@@ -1,246 +1,307 @@
-const widgetBox = document.getElementById("widget-box");
-const grid = document.getElementById("mood-grid");
+document.addEventListener("DOMContentLoaded", () => {
 
-/* =========================
-   BUILDER UI ELEMENTS
-========================= */
-const themeToggle = document.getElementById("themeToggle");
-const themeOptions = document.getElementById("themeOptions");
+  /* =========================
+     ELEMENTS
+  ========================= */
+  const widgetBox = document.getElementById("widget-box");
+  const grid = document.getElementById("mood-grid");
 
-const fontToggle = document.getElementById("fontToggle");
-const fontOptions = document.getElementById("fontOptions");
+  const resetBtn = document.getElementById("reset-button");
+  const resetPopup = document.getElementById("reset-popup");
+  const confirmReset = document.getElementById("confirm-reset");
+  const cancelReset = document.getElementById("cancel-reset");
 
-const copyLinkBtn = document.getElementById("copyLinkBtn");
-const copyMessage = document.getElementById("copyMessage");
+  const viewLogBtn = document.getElementById("view-log-btn");
+  const logPopup = document.getElementById("mood-log-popup");
+  const logEntries = document.getElementById("log-entries");
+  const closeLogBtn = document.getElementById("close-log-btn");
 
-const usageTip = document.getElementById("usageTip");
+  const copyBtn = document.getElementById("copyLinkBtn");
+  const copyMsg = document.getElementById("copyMessage");
 
-const params = new URLSearchParams(window.location.search);
-const isEmbed = params.get("embed") === "true";
+  const themeSelector = document.querySelector(".theme-selector");
+  const themeOptions = document.querySelector(".theme-options");
+  const currentThemeCircle = document.querySelector(".current-theme-circle");
 
-/* =========================
-   EMBED MODE
-========================= */
-if (isEmbed) {
-  document.querySelector(".builder-ui")?.style.setProperty("display", "none");
-}
+  const fontToggle = document.getElementById("fontToggle");
 
-/* =========================
-   STATE SYSTEM
-========================= */
-function getState() {
-  return {
-    theme: params.get("theme") || localStorage.getItem("userTheme") || "pink",
-    font: params.get("font") || localStorage.getItem("userFont") || "default"
+  const params = new URLSearchParams(window.location.search);
+
+  /* =========================
+     STATE FROM URL (SOURCE OF TRUTH)
+  ========================= */
+  function getState() {
+    return {
+      theme: params.get("theme") || "pink",
+      font: params.get("font") || "default",
+      embed: params.get("embed") === "true",
+      moods: JSON.parse(params.get("moods") || "{}") // stored as JSON in URL
+    };
+  }
+
+  let state = getState();
+  let moodData = { ...state.moods };
+
+  /* =========================
+     THEMES
+  ========================= */
+  const themes = {
+    pink: "#ffe7f5",
+    green: "#daece1",
+    lavender: "#f6e5fc",
+    blue: "#dceaf5"
   };
-}
 
-/* =========================
-   APPLY THEME
-========================= */
-function applyTheme(theme) {
-  widgetBox.className = `widget ${theme}`;
-  localStorage.setItem("userTheme", theme);
-}
+  function applyTheme(theme) {
+    widgetBox.className = `widget theme-${theme}`;
+    currentThemeCircle.style.background = themes[theme];
+  }
 
-/* =========================
-   APPLY FONT
-========================= */
-function applyFont(font) {
-  let fontFamily = "'Satoshi', sans-serif";
+  /* =========================
+     FONT SYSTEM
+  ========================= */
+  function applyFont(font) {
+    let family = "";
 
-  if (font === "serif") fontFamily = "Georgia, serif";
-  if (font === "mono") fontFamily = "ui-monospace, monospace";
+    if (font === "serif") family = "Georgia, serif";
+    else if (font === "mono") family = "ui-monospace, monospace";
+    else family = "'Work Sans', sans-serif";
 
-  widgetBox.style.fontFamily = fontFamily;
-  localStorage.setItem("userFont", font);
-}
+    widgetBox.style.fontFamily = family;
+  }
 
-/* =========================
-   INIT
-========================= */
-window.addEventListener("DOMContentLoaded", () => {
-  const state = getState();
+  /* =========================
+     SAVE TO URL (CORE SYSTEM)
+  ========================= */
+  function buildURL() {
+    const base = `${location.origin}${location.pathname}`;
 
-  applyTheme(state.theme);
-  applyFont(state.font);
+    const newParams = new URLSearchParams();
 
-  createGrid();
-});
+    newParams.set("theme", state.theme);
+    newParams.set("font", state.font);
+    newParams.set("embed", "true");
 
-/* =========================
-   THEME UI
-========================= */
-themeToggle?.addEventListener("click", (e) => {
-  e.stopPropagation();
-  themeOptions.classList.toggle("hidden");
-});
-
-themeOptions?.querySelectorAll(".theme-circle").forEach(circle => {
-  circle.addEventListener("click", () => {
-    applyTheme(circle.dataset.theme);
-    themeOptions.classList.add("hidden");
-  });
-});
-
-/* =========================
-   FONT UI
-========================= */
-fontToggle?.addEventListener("click", (e) => {
-  e.stopPropagation();
-  fontOptions.classList.toggle("hidden");
-});
-
-fontOptions?.querySelectorAll(".font-option").forEach(opt => {
-  opt.addEventListener("click", () => {
-    applyFont(opt.dataset.font);
-    fontOptions.classList.add("hidden");
-  });
-});
-
-/* =========================
-   MOOD SYSTEM
-========================= */
-const moods = [
-  { color: '#FEF1C8', label: 'good' },
-  { color: '#FFA7A6', label: 'loved' },
-  { color: '#C3C2D5', label: 'rough' },
-  { color: '#C4DADE', label: 'calm' },
-  { color: '#93B0AC', label: 'social' },
-  { color: '#DCC3B4', label: 'hectic' },
-  { color: '#E7D9CC', label: 'meh' },
-  { color: '#FFA5C5', label: 'awesome' }
-];
-
-const days = ["sun","mon","tue","wed","thu","fri","sat"];
-
-let moodLog = JSON.parse(localStorage.getItem("mood-log")) || {};
-let moodMenu = null;
-
-/* =========================
-   GRID BUILD
-========================= */
-function createGrid() {
-  grid.innerHTML = "";
-
-  const today = new Date();
-  const start = new Date(today);
-  start.setDate(today.getDate() - today.getDay());
-
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(start);
-    date.setDate(start.getDate() + i);
-
-    const key = date.toISOString().split("T")[0];
-
-    const cell = document.createElement("div");
-    cell.className = "day-cell";
-
-    const label = document.createElement("div");
-    label.className = "day-label";
-    label.textContent = `${days[i]} ${date.getMonth()+1}/${date.getDate()}`;
-
-    const content = document.createElement("div");
-    content.className = "day-content";
-
-    cell.appendChild(label);
-    cell.appendChild(content);
-
-    if (moodLog[key]) {
-      content.style.backgroundColor = moodLog[key].color;
-      content.textContent = moodLog[key].label;
-    } else {
-      content.textContent = "+";
+    if (Object.keys(moodData).length) {
+      newParams.set("moods", JSON.stringify(moodData));
     }
 
-    cell.addEventListener("click", (e) => {
-      e.stopPropagation();
-      openMoodMenu(cell, content, key);
+    return `${base}?${newParams.toString()}`;
+  }
+
+  function updateURL(replace = true) {
+    const url = buildURL();
+    if (replace) window.history.replaceState({}, "", url);
+  }
+
+  /* =========================
+     MOODS
+  ========================= */
+  const moods = [
+    { color: "#FEF1C8", label: "good" },
+    { color: "#FFA7A6", label: "loved" },
+    { color: "#C3C2D5", label: "rough" },
+    { color: "#C4DADE", label: "calm" },
+    { color: "#93B0AC", label: "social" },
+    { color: "#DCC3B4", label: "hectic" },
+    { color: "#E7D9CC", label: "meh" },
+    { color: "#FFA5C5", label: "awesome" }
+  ];
+
+  /* =========================
+     CELL RENDER
+  ========================= */
+  function setCell(cell, mood) {
+    const content = cell.querySelector(".day-content");
+
+    if (!mood) {
+      content.textContent = "+";
+      cell.style.background = "#f2f2f2";
+      return;
+    }
+
+    cell.style.background = mood.color;
+    content.textContent = mood.label;
+  }
+
+  /* =========================
+     GRID BUILDER (WEEK BASED)
+  ========================= */
+  function buildGrid() {
+    grid.innerHTML = "";
+
+    const today = new Date();
+
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(today.getDate() - i);
+
+      const key = date.toISOString().split("T")[0];
+
+      const cell = document.createElement("div");
+      cell.className = "day-cell";
+
+      const label = document.createElement("div");
+      label.className = "day-label";
+      label.textContent = key.slice(5);
+
+      const content = document.createElement("div");
+      content.className = "day-content";
+
+      cell.appendChild(label);
+      cell.appendChild(content);
+
+      setCell(cell, moodData[key]);
+
+      cell.addEventListener("click", () => {
+        openMoodMenu(cell, key);
+      });
+
+      grid.appendChild(cell);
+    }
+  }
+
+  /* =========================
+     MOOD MENU
+  ========================= */
+  let activeMenu = null;
+
+  function closeMenus() {
+    if (activeMenu) {
+      activeMenu.remove();
+      activeMenu = null;
+    }
+    themeOptions?.classList.add("hidden");
+    resetPopup?.classList.add("hidden");
+    logPopup?.classList.add("hidden");
+  }
+
+  function openMoodMenu(cell, key) {
+    closeMenus();
+
+    const menu = document.createElement("div");
+    menu.className = "mood-menu";
+
+    moods.forEach(m => {
+      const opt = document.createElement("div");
+      opt.className = "mood-option";
+
+      opt.innerHTML = `
+        <div class="mood-color" style="background:${m.color}"></div>
+        ${m.label}
+      `;
+
+      opt.onclick = () => {
+        moodData[key] = m;
+        updateURL();
+        setCell(cell, m);
+        menu.remove();
+      };
+
+      menu.appendChild(opt);
     });
 
-    grid.appendChild(cell);
+    widgetBox.appendChild(menu);
+    activeMenu = menu;
   }
-}
 
-/* =========================
-   MOOD MENU
-========================= */
-function openMoodMenu(cell, content, key) {
-  if (moodMenu) moodMenu.remove();
+  /* =========================
+     RESET (URL-BASED)
+  ========================= */
+  resetBtn.onclick = () => resetPopup.classList.remove("hidden");
 
-  moodMenu = document.createElement("div");
-  moodMenu.className = "mood-menu";
+  confirmReset.onclick = () => {
+    moodData = {};
+    updateURL();
+    buildGrid();
+    resetPopup.classList.add("hidden");
+  };
 
-  moods.forEach(mood => {
-    const btn = document.createElement("div");
-    btn.className = "mood-option";
+  cancelReset.onclick = () => resetPopup.classList.add("hidden");
 
-    const dot = document.createElement("div");
-    dot.className = "mood-color";
-    dot.style.background = mood.color;
+  /* =========================
+     VIEW LOG
+  ========================= */
+  viewLogBtn.onclick = () => {
+    logEntries.innerHTML = "";
 
-    const label = document.createElement("div");
-    label.textContent = mood.label;
+    Object.entries(moodData)
+      .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+      .forEach(([date, mood]) => {
+        const div = document.createElement("div");
+        div.textContent = `${date} — ${mood.label}`;
+        div.style.padding = "4px 0";
+        logEntries.appendChild(div);
+      });
 
-    btn.appendChild(dot);
-    btn.appendChild(label);
+    logPopup.classList.remove("hidden");
+  };
 
-    btn.onclick = () => {
-      moodLog[key] = mood;
-      localStorage.setItem("mood-log", JSON.stringify(moodLog));
+  closeLogBtn.onclick = () => logPopup.classList.add("hidden");
 
-      content.style.backgroundColor = mood.color;
-      content.textContent = mood.label;
+  /* =========================
+     THEME UI
+  ========================= */
+  themeSelector.onclick = (e) => {
+    e.stopPropagation();
+    themeOptions.classList.toggle("hidden");
+  };
 
-      moodMenu.remove();
+  Object.keys(themes).forEach(t => {
+    const circle = document.createElement("div");
+    circle.className = "theme-option-circle";
+    circle.style.background = themes[t];
+
+    circle.onclick = () => {
+      state.theme = t;
+      applyTheme(t);
+      updateURL();
+      themeOptions.classList.add("hidden");
     };
 
-    moodMenu.appendChild(btn);
+    themeOptions.appendChild(circle);
   });
 
-  widgetBox.appendChild(moodMenu);
-}
+  /* =========================
+     FONT (APPLIES TO EVERYTHING)
+  ========================= */
+  fontToggle?.addEventListener("click", (e) => {
+    e.stopPropagation();
 
-/* =========================
-   CLOSE MENUS
-========================= */
-document.addEventListener("click", () => {
-  if (moodMenu) moodMenu.remove();
-  themeOptions?.classList.add("hidden");
-  fontOptions?.classList.add("hidden");
-});
+    const fonts = ["default", "serif", "mono"];
+    const current = state.font;
 
-/* =========================
-   COPY LINK (FULL SYSTEM)
-========================= */
-copyLinkBtn?.addEventListener("click", async () => {
-  const theme = localStorage.getItem("userTheme") || "pink";
-  const font = localStorage.getItem("userFont") || "default";
+    const next = fonts[(fonts.indexOf(current) + 1) % fonts.length];
 
-  const url =
-    `${location.origin}${location.pathname}` +
-    `?theme=${theme}` +
-    `&font=${font}` +
-    `&embed=true`;
+    state.font = next;
+    applyFont(next);
+    updateURL();
+  });
 
-  try {
+  /* =========================
+     COPY LINK (FULL STATE)
+  ========================= */
+  copyBtn?.addEventListener("click", async () => {
+    const url = buildURL();
+
     await navigator.clipboard.writeText(url);
 
-    copyMessage.classList.add("hidden");
-    copyMessage.classList.remove("show");
+    copyMsg.classList.remove("hidden");
 
-    void copyMessage.offsetWidth;
+    setTimeout(() => {
+      copyMsg.classList.add("hidden");
+    }, 1500);
+  });
 
-    copyMessage.classList.remove("hidden");
-    copyMessage.classList.add("show");
+  /* =========================
+     GLOBAL CLICK CLOSE
+  ========================= */
+  document.body.addEventListener("click", closeMenus);
 
-    clearTimeout(window.__copyTimer);
-    window.__copyTimer = setTimeout(() => {
-      copyMessage.classList.add("hidden");
-      copyMessage.classList.remove("show");
-    }, 1800);
-
-  } catch (err) {
-    console.error("copy failed", err);
-  }
+  /* =========================
+     INIT
+  ========================= */
+  applyTheme(state.theme);
+  applyFont(state.font);
+  buildGrid();
 });
