@@ -251,32 +251,23 @@ body {
   min-height: 90px; /* 🔥 ensures layout stability */
 }
 
-/* =========================
-   FIX: POPUPS MUST FLOAT ABOVE EVERYTHING
-========================= */
-.theme-options,
-#fontOptions,
 .reset-popup {
-  z-index: 9999;
+  position: fixed;   /* 🔥 key change */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 220px;
+
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(14px);
+
+  padding: 14px;
+  border-radius: 14px;
+
+  box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+
+  text-align: center;
+
+  z-index: 99999; /* above everything */
 }
-
-/* =========================
-   FIX: RESET / LOG POPUP VISIBILITY
-========================= */
-.reset-popup {
-  display: none;
-}
-
-.reset-popup:not(.hidden) {
-  display: block;
-}
-
-/* =========================
-   FIX: MAKE HIDDEN CONSISTENT
-========================= */
-.hidden {
-  display: none !important;
-}
-
-
-
