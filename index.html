@@ -3,57 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>mood tracker</title>
+  <title>Mood Tracker Widget</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div class="widget theme-pink" id="widget-box">
-    <div class="widget-header">
-      <h1>mood tracker</h1>
-      <div class="theme-selector" title="change theme">
-        <div class="current-theme-circle"></div>
-        <div class="theme-options hidden">
-          <div class="theme-option-circle" data-theme="pink" style="background:#ffe7f5"></div>
-          <div class="theme-option-circle" data-theme="green" style="background:#daece1"></div>
-          <div class="theme-option-circle" data-theme="lavender" style="background:#f6e5fc"></div>
-          <div class="theme-option-circle" data-theme="blue" style="background:#dceaf5"></div>
-        </div>
-      </div>
-    </div>
-    <div class="grid" id="mood-grid"></div>
-    
- <!-- Reset button -->
-<button id="reset-button" class="reset-btn">reset</button>
 
-<!-- View Mood Log button -->
-<button id="view-log-btn" class="reset-btn">view log</button>
+<!-- BUILDER UI -->
+<div class="builder-ui">
 
-<!-- Reset confirmation popup -->
-<div id="reset-popup" class="reset-popup hidden">
-  <p>reset all moods?</p>
-  <div class="reset-actions">
-    <button id="confirm-reset" class="confirm-btn">yes</button>
-    <button id="cancel-reset" class="cancel-btn">no</button>
+  <div class="widget-header">
+    Mood Tracker Widget
   </div>
+
+  <!-- USAGE TIP (MISSING BEFORE) -->
+  <div id="usageTip" class="usage-tip">
+    welcome to your mood tracker ✧<br>
+    click each day to log your mood<br>
+    customize theme + font + copy embed link for notion
+  </div>
+
+  <!-- THEME OPTIONS -->
+  <div id="themeOptions" class="theme-options hidden">
+    <div class="theme-circle pink" data-theme="pink"></div>
+    <div class="theme-circle green" data-theme="green"></div>
+    <div class="theme-circle lavender" data-theme="lavender"></div>
+    <div class="theme-circle blue" data-theme="blue"></div>
+  </div>
+
+  <!-- FONT OPTIONS -->
+  <div id="fontOptions" class="theme-options hidden">
+    <div class="font-option" data-font="default">default</div>
+    <div class="font-option" data-font="serif">serif</div>
+    <div class="font-option" data-font="mono">mono</div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="top-left-controls">
+
+    <div id="themeToggle" class="btn">🎨</div>
+    <div id="fontToggle" class="btn">Aa</div>
+
+  </div>
+
+  <!-- COPY BUTTON -->
+  <div class="setup-area">
+    <button id="copyLinkBtn" class="copy-btn">
+      copy my embed Notion link .ᐟ.ᐟ
+    </button>
+
+    <p id="copyMessage" class="copy-message hidden">
+      copied! paste into notion .ᐟ.ᐟ
+    </p>
+  </div>
+
 </div>
 
-<!-- Mood Log Popup -->
-<div id="mood-log-popup" class="reset-popup hidden">
-  <h3>mood log</h3>
-  <div id="log-entries" style="max-height:180px; overflow-y:auto; text-align:left; font-size:12px;"></div>
-  <button id="close-log-btn" class="confirm-btn" style="margin-top:8px; width:100%;">close</button>
-</div>
+<!-- WIDGET -->
+<div class="widget pink" id="widget-box">
 
-  <!-- Reset confirmation popup -->
+  <div class="grid" id="mood-grid"></div>
+
+  <button id="reset-button" class="reset-btn">reset</button>
+  <button id="view-log-btn" class="reset-btn">view log</button>
+
+  <!-- RESET POPUP -->
   <div id="reset-popup" class="reset-popup hidden">
     <p>reset all moods?</p>
     <div class="reset-actions">
-      <button id="confirm-reset" class="confirm-btn">yes</button>
-      <button id="cancel-reset" class="cancel-btn">no</button>
+      <button id="confirm-reset">yes</button>
+      <button id="cancel-reset">no</button>
     </div>
   </div>
+
+  <!-- LOG POPUP -->
+  <div id="mood-log-popup" class="reset-popup hidden">
+    <h3>mood log</h3>
+    <div id="log-entries"></div>
+    <button id="close-log-btn">close</button>
+  </div>
+
 </div>
 
-  <script src="mood-tracker.js"></script>
+<script src="mood-tracker.js"></script>
 </body>
 </html>
