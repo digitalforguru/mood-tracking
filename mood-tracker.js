@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const fontToggle = document.getElementById("fontToggle");
   const fontOptions = document.getElementById("fontOptions");
   const fontChoices = document.querySelectorAll(".font-option");
+  const themeToggle = document.getElementById("themeToggle");
+  const themeOptions = document.getElementById("themeOptions");
+  const themeCircles = document.querySelectorAll(".theme-circle");
 
   /* =========================
      URL PARAMS (SOURCE OF TRUTH)
@@ -53,12 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
     { color: "#FFA5C5", label: "awesome" }
   ];
 
-  const themes = {
-    pink: "#ffe7f5",
-    green: "#daece1",
-    lavender: "#f6e5fc",
-    blue: "#dceaf5"
-  };
 
   let moodLog = JSON.parse(localStorage.getItem("mood-log")) || {};
   let moodMenu = null;
@@ -87,6 +84,20 @@ document.addEventListener("DOMContentLoaded", () => {
     widgetBox.style.fontFamily = fontFamily;
   }
 
+themeToggle.addEventListener("click", () => {
+  themeOptions.classList.toggle("hidden");
+});
+
+themeCircles.forEach(circle => {
+  circle.addEventListener("click", () => {
+    const theme = circle.getAttribute("data-theme");
+
+    weatherWidget.className = `widget ${theme} small-square`;
+    localStorage.setItem("userTheme", theme);
+    
+    themeOptions.classList.add("hidden");
+  });
+  
   /* =========================
      WEEK BUILDER
   ========================= */
@@ -285,7 +296,13 @@ document.addEventListener("DOMContentLoaded", () => {
   ========================= */
   document.addEventListener("click", closeMenus);
 
-  /* =========================
+
+   if (savedTheme) {
+  widget pink.className = `widget ${savedTheme} -box`;
+} else {
+  widget pink.className = `widget pink pink -box`;
+}
+
      INIT
   ========================= */
   applyTheme(state.theme);
