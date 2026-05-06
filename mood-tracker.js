@@ -196,11 +196,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const cell = document.createElement("div");
       cell.className = "day-cell";
 
+      const date = key.split("-")[2]; // extracts day number
+      
       cell.innerHTML = `
-        <div class="day-label">${day}</div>
-        <div class="day-content"></div>
-      `;
-
+        <div class="day-label">
+          ${day}
+          <span class="day-date">${date}</span>
+          </div>
+          <div class="day-content"></div>
+        `;
       renderCell(cell, moodLog[key]);
 
       cell.onclick = (e) => {
