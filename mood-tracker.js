@@ -6,10 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const widgetBox = document.getElementById("widget-box");
   const grid = document.getElementById("mood-grid");
 
-  const themeSelector = document.querySelector(".theme-selector");
+  const themeToggle = document.getElementById("themeToggle");
   const themeOptions = document.getElementById("themeOptions");
   const themeCircles = document.querySelectorAll(".theme-circle");
-  const currentThemeCircle = document.querySelector(".current-theme-circle");
 
   const fontToggle = document.getElementById("fontToggle");
   const fontOptions = document.getElementById("fontOptions");
@@ -43,15 +42,12 @@ document.addEventListener("DOMContentLoaded", () => {
      THEMES
   ========================= */
   const themes = {
-    pink: "#ffe7f5",
-    green: "#daece1",
-    lavender: "#f6e5fc",
-    blue: "#dceaf5"
+    pink: "#f4dfeb",
+    green: "#ddedea",
+    beige: "#faebdd",
+    blue: "#ddebf1"
   };
 
-  /* =========================
-     MOODS
-  ========================= */
   const moods = [
     { color: "#FEF1C8", label: "good" },
     { color: "#FFA7A6", label: "loved" },
@@ -69,14 +65,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let moodMenu = null;
 
   /* =========================
-     THEME APPLY
+     THEME APPLY (FIXED)
   ========================= */
   function applyTheme(theme) {
     if (!widgetBox) return;
-    widgetBox.className = `widget theme-${theme}`;
-    if (currentThemeCircle) {
-      currentThemeCircle.style.backgroundColor = themes[theme];
-    }
+
+    widgetBox.classList.remove("pink","green","beige","blue");
+    widgetBox.classList.add(theme);
+
+    state.theme = theme;
   }
 
   /* =========================
@@ -88,9 +85,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ? "Georgia, serif"
         : font === "mono"
         ? "ui-monospace, monospace"
-        : "'Work Sans', sans-serif";
+        : "'Satoshi', sans-serif";
 
     widgetBox.style.fontFamily = fontFamily;
+
+    state.font = font;
   }
 
   /* =========================
@@ -144,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     CLOSE ALL MENUS
+     CLOSE MENUS
   ========================= */
   function closeMenus() {
     moodMenu?.remove();
@@ -214,26 +213,27 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     THEME UI
+     THEME UI (FIXED)
   ========================= */
-  themeSelector?.addEventListener("click", (e) => {
+  themeToggle?.addEventListener("click", (e) => {
     e.stopPropagation();
-    themeOptions.classList.toggle("hidden");
+    themeOptions?.classList.toggle("hidden");
   });
 
   themeCircles.forEach(circle => {
-    circle.addEventListener("click", () => {
+    circle.addEventListener("click", (e) => {
       const theme = circle.dataset.theme;
       applyTheme(theme);
+      themeOptions.classList.add("hidden");
     });
   });
 
   /* =========================
-     FONT UI
+     FONT UI (FIXED)
   ========================= */
   fontToggle?.addEventListener("click", (e) => {
     e.stopPropagation();
-    fontOptions.classList.toggle("hidden");
+    fontOptions?.classList.toggle("hidden");
   });
 
   fontChoices.forEach(opt => {
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
-     LOG
+     LOG (FIXED)
   ========================= */
   viewLogBtn?.addEventListener("click", () => {
     logEntriesDiv.innerHTML = "";
@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
-     COPY LINK (STABLE)
+     COPY LINK (FIXED STATE BUG)
   ========================= */
   copyBtn?.addEventListener("click", async () => {
     const url =
@@ -291,14 +291,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     await navigator.clipboard.writeText(url);
 
-    if (!copyMsg) return;
-
-    copyMsg.classList.remove("hidden");
-    copyMsg.classList.add("show");
+    copyMsg?.classList.remove("hidden");
+    copyMsg?.classList.add("show");
 
     setTimeout(() => {
-      copyMsg.classList.add("hidden");
-      copyMsg.classList.remove("show");
+      copyMsg?.classList.add("hidden");
+      copyMsg?.classList.remove("show");
     }, 1500);
   });
 
@@ -308,7 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", closeMenus);
 
   /* =========================
-     INIT
+     INIT (IMPORTANT FIX)
   ========================= */
   applyTheme(state.theme);
   applyFont(state.font);
