@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+
   /* =========================
      ELEMENTS
   ========================= */
@@ -8,6 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeSelector = document.querySelector(".theme-selector");
   const themeOptions = document.querySelector(".theme-options");
   const currentThemeCircle = document.querySelector(".current-theme-circle");
+
+  const fontToggle = document.getElementById("fontToggle");
+  const fontOptions = document.getElementById("fontOptions");
+  const fontChoices = document.querySelectorAll(".font-option");
 
   const resetButton = document.getElementById("reset-button");
   const resetPopup = document.getElementById("reset-popup");
@@ -22,15 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyBtn = document.getElementById("copyLinkBtn");
   const copyMsg = document.getElementById("copyMessage");
 
-  const fontToggle = document.getElementById("fontToggle");
-  const fontOptions = document.getElementById("fontOptions");
-  const fontChoices = document.querySelectorAll(".font-option");
-  const themeToggle = document.getElementById("themeToggle");
-  const themeOptions = document.getElementById("themeOptions");
-  const themeCircles = document.querySelectorAll(".theme-circle");
-
   /* =========================
-     URL PARAMS (SOURCE OF TRUTH)
+     STATE (URL BASED)
   ========================= */
   const params = new URLSearchParams(window.location.search);
 
@@ -41,9 +39,14 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* =========================
-     DATA
+     THEMES
   ========================= */
-  const days = ["sun","mon","tue","wed","thu","fri","sat"];
+  const themes = {
+    pink: "#ffe7f5",
+    green: "#daece1",
+    lavender: "#f6e5fc",
+    blue: "#dceaf5"
+  };
 
   const moods = [
     { color: "#FEF1C8", label: "good" },
@@ -56,24 +59,25 @@ document.addEventListener("DOMContentLoaded", () => {
     { color: "#FFA5C5", label: "awesome" }
   ];
 
+  const days = ["sun","mon","tue","wed","thu","fri","sat"];
 
   let moodLog = JSON.parse(localStorage.getItem("mood-log")) || {};
   let moodMenu = null;
 
   /* =========================
-     SAFE SCOPED STYLE APPLY
+     APPLY THEME
   ========================= */
   function applyTheme(theme) {
-    if (!widgetBox) return;
     widgetBox.className = `widget theme-${theme}`;
     if (currentThemeCircle) {
       currentThemeCircle.style.backgroundColor = themes[theme];
     }
   }
 
+  /* =========================
+     APPLY FONT (SCOPED ONLY)
+  ========================= */
   function applyFont(font) {
-    if (!widgetBox) return;
-
     let fontFamily =
       font === "serif"
         ? "Georgia, serif"
@@ -84,22 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
     widgetBox.style.fontFamily = fontFamily;
   }
 
-themeToggle.addEventListener("click", () => {
-  themeOptions.classList.toggle("hidden");
-});
-
-themeCircles.forEach(circle => {
-  circle.addEventListener("click", () => {
-    const theme = circle.getAttribute("data-theme");
-
-    weatherWidget.className = `widget ${theme} small-square`;
-    localStorage.setItem("userTheme", theme);
-    
-    themeOptions.classList.add("hidden");
-  });
-  
   /* =========================
-     WEEK BUILDER
+     WEEK GENERATION
   ========================= */
   function getWeekDates() {
     const today = new Date();
@@ -109,6 +99,7 @@ themeCircles.forEach(circle => {
     return Array.from({ length: 7 }).map((_, i) => {
       const d = new Date(start);
       d.setDate(start.getDate() + i);
+
       return {
         day: days[i],
         key: d.toISOString().split("T")[0]
@@ -116,11 +107,17 @@ themeCircles.forEach(circle => {
     });
   }
 
+  /* =========================
+     MOOD SAVE
+  ========================= */
   function saveMood(key, mood) {
     moodLog[key] = mood;
     localStorage.setItem("mood-log", JSON.stringify(moodLog));
   }
 
+  /* =========================
+     CELL RENDER
+  ========================= */
   function renderCell(cell, mood) {
     const content = cell.querySelector(".day-content");
     content.innerHTML = "";
@@ -133,23 +130,30 @@ themeCircles.forEach(circle => {
 
     content.style.background = mood.color;
 
-    const text = document.createElement("span");
-    text.textContent = mood.label;
-    text.style.fontSize = "10px";
-    text.style.opacity = "0.8";
+    const label = document.createElement("span");
+    label.textContent = mood.label;
+    label.style.fontSize = "10px";
+    label.style.opacity = "0.85";
 
-    content.appendChild(text);
+    content.appendChild(label);
   }
 
+  /* =========================
+     CLOSE MENUS
+  ========================= */
   function closeMenus() {
-    if (moodMenu) moodMenu.remove();
+    moodMenu?.remove();
     moodMenu = null;
+
     themeOptions?.classList.add("hidden");
     fontOptions?.classList.add("hidden");
     resetPopup?.classList.add("hidden");
     moodLogPopup?.classList.add("hidden");
   }
 
+  /* =========================
+     MOOD MENU
+  ========================= */
   function createMoodMenu(cell, key) {
     closeMenus();
 
@@ -157,29 +161,31 @@ themeCircles.forEach(circle => {
     moodMenu.className = "mood-menu";
 
     moods.forEach(m => {
-      const el = document.createElement("div");
-      el.className = "mood-option";
+      const option = document.createElement("div");
+      option.className = "mood-option";
 
-      el.innerHTML = `
+      option.innerHTML = `
         <div class="mood-color" style="background:${m.color}"></div>
         <div>${m.label}</div>
       `;
 
-      el.onclick = (e) => {
+      option.onclick = (e) => {
         e.stopPropagation();
         saveMood(key, m);
         renderCell(cell, m);
         closeMenus();
       };
 
-      moodMenu.appendChild(el);
+      moodMenu.appendChild(option);
     });
 
     widgetBox.appendChild(moodMenu);
   }
 
+  /* =========================
+     BUILD GRID
+  ========================= */
   function buildGrid() {
-    if (!grid) return;
     grid.innerHTML = "";
 
     getWeekDates().forEach(({ key, day }) => {
@@ -207,22 +213,21 @@ themeCircles.forEach(circle => {
   ========================= */
   themeSelector?.addEventListener("click", (e) => {
     e.stopPropagation();
-    themeOptions?.classList.toggle("hidden");
+    themeOptions.classList.toggle("hidden");
   });
 
   themeOptions?.addEventListener("click", (e) => {
-    const target = e.target;
-    if (!target.dataset.theme) return;
-
-    applyTheme(target.dataset.theme);
+    if (e.target.dataset.theme) {
+      applyTheme(e.target.dataset.theme);
+    }
   });
 
   /* =========================
-     FONT UI (SCOPED)
+     FONT UI
   ========================= */
   fontToggle?.addEventListener("click", (e) => {
     e.stopPropagation();
-    fontOptions?.classList.toggle("hidden");
+    fontOptions.classList.toggle("hidden");
   });
 
   fontChoices.forEach(opt => {
@@ -271,7 +276,7 @@ themeCircles.forEach(circle => {
   });
 
   /* =========================
-     COPY FIX (NO LAYOUT SHIFT)
+     COPY LINK
   ========================= */
   copyBtn?.addEventListener("click", async () => {
     const url =
@@ -285,24 +290,17 @@ themeCircles.forEach(circle => {
     copyMsg.classList.remove("hidden");
     copyMsg.classList.add("show");
 
-    clearTimeout(window.__copyTimer);
-    window.__copyTimer = setTimeout(() => {
+    setTimeout(() => {
       copyMsg.classList.add("hidden");
     }, 1500);
   });
 
   /* =========================
-     GLOBAL CLICK CLOSE
+     GLOBAL CLOSE
   ========================= */
   document.addEventListener("click", closeMenus);
 
-
-   if (savedTheme) {
-  widget pink.className = `widget ${savedTheme} -box`;
-} else {
-  widget pink.className = `widget pink pink -box`;
-}
-
+  /* =========================
      INIT
   ========================= */
   applyTheme(state.theme);
