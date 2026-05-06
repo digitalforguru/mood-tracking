@@ -62,32 +62,96 @@ body {
   transform: scale(1.05);
 }
 
-/* ================= DROPDOWNS ================= */
+/* Theme toggle button - transparent circle with white border */
+.theme-toggle-btn {
+  width: 20px;
+  height: 20px;
+
+  border: 2px solid white;
+
+  background-color: var(--theme-color, #f4dfeb);
+
+  border-radius: 50%;
+
+  box-sizing: border-box;
+}
+
+/* Theme options dropdown container */
 .theme-options {
   position: absolute;
-  top: 70px;
+  top: 68px;
   left: 50%;
   transform: translateX(-50%);
+
   display: flex;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 16px;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 16px;
+
+  border-radius: 18px;
+
   background: rgba(255,255,255,0.95);
   backdrop-filter: blur(16px);
+
   box-shadow: 0 18px 40px rgba(0,0,0,0.12);
-  z-index: 100;
+
+  z-index: 20;
 }
 
-.theme-options.hidden {
-  display: none;
+/* title inside popup */
+.theme-options::before {
+  content: "select theme";
+  font-size: 11px;
+  opacity: 0.6;
 }
 
+/* row of circles */
+.theme-options .themes-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* circles */
 .theme-circle {
   width: 22px;
   height: 22px;
+
   border-radius: 50%;
+
   cursor: pointer;
+
+  border: 2px solid rgba(0,0,0,0.08);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.theme-circle:hover {
+  transform: scale(1.25);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+.theme-circle.pink {
+  background-color: #f4dfeb;
+}
+
+.theme-circle.beige {
+  background-color: #faebdd;
+}
+
+.theme-circle.blue {
+  background-color: #ddebf1;
+}
+
+.theme-circle.green {
+  background-color: #ddedea;
+}
+.theme-circle.active {
+  border: 2px solid #333;
+  transform: scale(1.15);
+}
+
 
 /* ================= WIDGET ================= */
 .widget {
@@ -213,5 +277,6 @@ body {
 .hidden {
   display: none !important;
 }
+
 
 
