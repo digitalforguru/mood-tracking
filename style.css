@@ -163,3 +163,55 @@ body {
 .hidden {
   display: none !important;
 }
+/* =========================
+   FIX: WIDGET ALWAYS EXISTS
+========================= */
+.widget {
+  width: 360px;
+  min-height: 220px;   /* 🔥 prevents “invisible until click” */
+  margin: 0 auto 20px;
+  padding: 14px;
+  border-radius: 16px;
+  position: relative;
+  box-sizing: border-box;
+  display: block;
+}
+
+/* =========================
+   FIX: GRID NEVER COLLAPSES
+========================= */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  min-height: 90px; /* 🔥 ensures layout stability */
+}
+
+/* =========================
+   FIX: POPUPS MUST FLOAT ABOVE EVERYTHING
+========================= */
+.theme-options,
+#fontOptions,
+.reset-popup {
+  z-index: 9999;
+}
+
+/* =========================
+   FIX: RESET / LOG POPUP VISIBILITY
+========================= */
+.reset-popup {
+  display: none;
+}
+
+.reset-popup:not(.hidden) {
+  display: block;
+}
+
+/* =========================
+   FIX: MAKE HIDDEN CONSISTENT
+========================= */
+.hidden {
+  display: none !important;
+}
+
+
