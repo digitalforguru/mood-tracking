@@ -265,13 +265,9 @@ document.addEventListener("DOMContentLoaded", () => {
     resetPopup.classList.add("hidden");
   });
 
-  /* =========================
-     LOG (GRID STYLE READY HOOK)
-  ========================= */
-  /* =========================
-   LOG (YEAR GRID VERSION)
-========================= */
-viewLogBtn?.addEventListener("click", () => {
+viewLogBtn?.addEventListener("click", (e) => {
+  e.stopPropagation();
+
   logEntriesDiv.innerHTML = "";
 
   const today = new Date();
@@ -291,18 +287,19 @@ viewLogBtn?.addEventListener("click", () => {
 
     if (mood) {
       cell.style.background = mood.color;
-      cell.setAttribute(
-        "data-tooltip",
-        `${key} → ${mood.label}`
-      );
+      cell.title = `${key} → ${mood.label}`;
     } else {
-      cell.setAttribute("data-tooltip", `${key} → no mood`);
+      cell.style.background = "#f2f2f2";
+      cell.title = `${key} → no mood`;
     }
 
     logEntriesDiv.appendChild(cell);
   }
 
   moodLogPopup.classList.remove("hidden");
+  moodLogPopup.style.display = "block"; // 🔥 FORCE VISIBILITY FIX
+
+  document.body.appendChild(moodLogPopup); // 🔥 ensures it's not trapped visually
 });
 
   closeLogBtn?.addEventListener("click", () => {
