@@ -206,7 +206,7 @@ function saveMood(key, mood) {
         <div>${m.label}</div>
       `;
 
-      el.onclick = (e) => {
+      el.addEventListener("click", (e) => {
         e.stopPropagation();
         saveMood(key, m);
         renderCell(cell, m);
@@ -239,10 +239,10 @@ function saveMood(key, mood) {
 
       renderCell(cell, moodLog[key]);
 
-      cell.onclick = (e) => {
-        e.stopPropagation();
-        createMoodMenu(cell, key);
-      };
+      cell.addEventListener("click", (e) => {
+  e.stopPropagation();
+  createMoodMenu(cell, key);
+});
 
       grid.appendChild(cell);
     });
