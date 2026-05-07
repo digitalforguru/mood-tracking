@@ -69,9 +69,10 @@ body {
 
 .btn:hover {
   transform: translateY(-2px) scale(1.05);
+}
 
 .top-left-controls {
-  position: relative; /* 🔥 THIS IS WHAT YOU WERE MISSING */
+  position: relative;
   display: flex;
   gap: 12px;
   justify-content: center;
@@ -84,18 +85,22 @@ body {
   margin-top: 10px;
   text-align: center;
 }
-/* Theme toggle button - transparent circle with white border */
 .theme-toggle-btn {
+  position: relative;
+}
+
+.theme-toggle-btn::before {
+  content: "";
+
   width: 20px;
   height: 20px;
 
+  border-radius: 50%;
   border: 2px solid white;
 
-  background-color: var(--theme-color, #f4dfeb);
+  background: var(--theme-color, #f4dfeb);
 
-  border-radius: 50%;
-
-  box-sizing: border-box;
+  display: block;
 }
 
 /* Theme options dropdown container */
@@ -180,11 +185,6 @@ body {
 .widget.green { background:#ddedea; color:#5b6c5a; }
 
 /* ================= GRID ================= */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-}
 
 .day-cell {
   height: 78px;
@@ -275,20 +275,21 @@ body {
 .widget {
   position: relative;
   overflow: hidden;
+
   width: 400px;
-  min-height: 260px;   /* 🔥 prevents “invisible until click” */
+
   margin: 0 auto 20px;
   padding: 14px;
+
   border-radius: 16px;
-  position: relative;
+
   box-sizing: border-box;
+
   display: block;
-}
 
+  min-height: unset;
 
-.grid {
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
+  isolation: isolate;
 }
 
 .reset-popup {
@@ -311,10 +312,6 @@ body {
   text-align: center;
 
   z-index: 9999;
-}
-
-.widget-box {
-  overflow: hidden;
 }
 
 .day-label {
@@ -386,11 +383,10 @@ body {
 }
 
 .grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
   margin-bottom: 2px;
-}
-
-.widget {
-  min-height: unset; /* removes forced empty breathing room */
 }
 
 .widget-box {
