@@ -74,13 +74,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const days = ["sun","mon","tue","wed","thu","fri","sat"];
 
-  const urlParams = new URLSearchParams(window.location.search);
+ const urlParams = new URLSearchParams(window.location.search);
 const encodedMoods = urlParams.get("moods");
 
 let moodLog =
   (encodedMoods && decodeMoodLog(encodedMoods)) ||
-  JSON.parse(localStorage.getItem("mood-log") || "{}") ||
-  {};
+  JSON.parse(localStorage.getItem("mood-log") || "{}");
+
+let moodMenu = null;
   /* =========================
      THEME APPLY
   ========================= */
