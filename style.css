@@ -1,17 +1,18 @@
 body {
   margin: 0;
-  padding: 20px;
+  padding: 10px;
 
   background: transparent;
   font-family: 'Satoshi', sans-serif;
 
-  min-height: 100vh;
-
   display: flex;
   justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  gap: 40px;
+  align-items: flex-start;
+
+  min-height: 100vh;
+
+  padding-top: 60px; /* 👈 THIS is the magic lift */
+  box-sizing: border-box;
 }
 
 .builder-ui {
