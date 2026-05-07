@@ -265,7 +265,7 @@ body {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 * {
   -webkit-font-smoothing: antialiased;
@@ -274,6 +274,7 @@ body {
 
 .widget {
   position: relative;
+
   overflow: hidden;
 
   width: 400px;
@@ -285,11 +286,12 @@ body {
 
   box-sizing: border-box;
 
-  display: block;
-
-  min-height: unset;
-
   isolation: isolate;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
 }
 
 .reset-popup {
@@ -332,29 +334,34 @@ body {
 
 .log-popup {
   position: absolute;
+
   top: 50%;
   left: 50%;
+
   transform: translate(-50%, -50%);
 
   width: 85%;
   max-width: 260px;
+
   height: 70%;
 
-  background: rgba(255,255,255,0.92);
-  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.94);
+  backdrop-filter: blur(14px);
 
-  border-radius: 14px;
+  border-radius: 16px;
 
   padding: 10px;
 
-  z-index: 50;
+  z-index: 999;
 
   display: flex;
   flex-direction: column;
 
+  overflow: hidden;
+
   box-sizing: border-box;
 
-  overflow: hidden;
+  pointer-events: auto;
 }
 
 .widget-header-title {
@@ -382,33 +389,23 @@ body {
   margin: 4px 0;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-bottom: 2px;
-}
-
-.widget-box {
-  gap: 6px; /* tighter + intentional spacing */
-}
 #log-entries {
   display: grid;
 
-  /* 🔥 KEY FIX: stop elastic stretching */
-  grid-template-columns: repeat(18, auto);
-
-  gap: 2px;
-
-  padding: 6px;
+  grid-template-columns: repeat(18, 8px);
 
   justify-content: center;
   align-content: start;
 
-  overflow: hidden;
+  gap: 3px;
 
-  /* 🔥 keeps it inside widget bounds */
-  max-width: 100%;
+  padding: 8px;
+
+  overflow-y: auto;
+
+  max-height: 180px;
+
+  flex: 1;
 }
 
 .year-cell {
