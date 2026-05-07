@@ -309,7 +309,13 @@ body {
 
 .log-popup {
   position: absolute;
-  inset: 10px; /* keeps it INSIDE widget with breathing room */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 85%;
+  max-width: 260px;
+  height: 70%;
 
   background: rgba(255,255,255,0.92);
   backdrop-filter: blur(12px);
@@ -395,8 +401,4 @@ body {
 .reset-popup,
 .log-popup {
   max-height: 85%;
-}
-.log-popup {
-  width: 100%;
-  height: 100%;
 }
