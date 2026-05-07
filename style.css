@@ -153,16 +153,19 @@ body {
 }
 
 
-/* ================= WIDGET ================= */
 .widget-box {
-  max-width: 360px;
-  margin: 0 auto 20px;
+  width: 360px;
+  margin: 0 auto 12px;
   padding: 14px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 7px; /* controls clean spacing instead of mystery whitespace */
+
   border-radius: 16px;
   position: relative;
   box-sizing: border-box;
 }
-
 .widget.pink { background:#f4dfeb; color:#60355c; }
 .widget.beige { background:#faebdd; color:#5d4c3a; }
 .widget.blue { background:#ddebf1; color:#4b5c74; }
@@ -176,7 +179,7 @@ body {
 }
 
 .day-cell {
-  height: 70px;
+  height: 78px;
   border-radius: 10px;
   background: #f2f2f2;
   position: relative;
@@ -260,8 +263,8 @@ body {
    FIX: WIDGET ALWAYS EXISTS
 ========================= */
 .widget {
-  width: 360px;
-  min-height: 220px;   /* 🔥 prevents “invisible until click” */
+  width: 400px;
+  min-height: 260px;   /* 🔥 prevents “invisible until click” */
   margin: 0 auto 20px;
   padding: 14px;
   border-radius: 16px;
@@ -270,23 +273,20 @@ body {
   display: block;
 }
 
-/* =========================
-   FIX: GRID NEVER COLLAPSES
-========================= */
+
 .grid {
-  display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  min-height: 90px; /* 🔥 ensures layout stability */
+  gap: 10px;
 }
 
 .reset-popup {
-  position: fixed;   /* 🔥 key change */
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 
-  width: 220px;
+  width: 80%;
+  max-width: 240px;
 
   background: rgba(255,255,255,0.95);
   backdrop-filter: blur(14px);
@@ -298,7 +298,11 @@ body {
 
   text-align: center;
 
-  z-index: 99999; /* above everything */
+  z-index: 9999;
+}
+
+.widget-box {
+  overflow: hidden;
 }
 
 .day-label {
@@ -353,32 +357,30 @@ body {
   z-index: 999;
 }
 
-/* =========================
-   LOG POPUP SEPARATE STYLE
-========================= */
+
 .log-popup {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  background: white;
-  padding: 14px;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-  text-align: center;
+  inset: 10px;
+
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(14px);
+
+  border-radius: 14px;
+
+  padding: 10px;
+
   z-index: 9999;
 
-  width: 320px;
-  max-height: 320px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 #log-entries {
   display: grid;
-  grid-template-columns: repeat(20, 1fr);
+  grid-template-columns: repeat(18, 1fr);
   gap: 3px;
-  padding: 10px;
-  max-height: 300px;
+
   overflow-y: auto;
+  flex: 1;
 }
 
 .year-cell {
@@ -386,4 +388,24 @@ body {
   height: 10px;
   border-radius: 2px;
   background: #eee;
+}
+.widget-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.5px;
+
+  padding: 6px 12px;
+  border-radius: 999px;
+
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+
+  margin-bottom: 6px;
+}
+.reset-popup p,
+.log-popup h3 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  opacity: 0.8;
 }
