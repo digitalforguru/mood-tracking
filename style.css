@@ -316,3 +316,39 @@ body {
   font-size: 9px;
   opacity: 0.6;
 }
+/* =========================
+   YEAR GRID (VIEW LOG)
+========================= */
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(18, 1fr);
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+/* each day square */
+.year-cell {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: #eee;
+  position: relative;
+}
+
+/* hover tooltip feel */
+.year-cell:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: black;
+  color: white;
+  font-size: 9px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  z-index: 999;
+}
