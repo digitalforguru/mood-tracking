@@ -8,34 +8,19 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 30px;
 
   min-height: 100vh;
+  flex-wrap: nowrap;
 }
-.builder-ui,
-.widget {
-  display: inline-flex;
-  vertical-align: top;
-}
-body {
-  gap: 30px;
-  flex-wrap: wrap;
-}
+
 .builder-ui {
   width: 320px;
-}
 
-.widget {
-  width: 400px;
-}
-body {
-  align-content: center;
-}
-
-
-.builder-ui {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 
   gap: 10px;
 }
