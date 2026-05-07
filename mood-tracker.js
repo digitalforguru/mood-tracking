@@ -1,3 +1,10 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://johavlaywmsjelumhirv.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvaGF2bGF5d21zamVsdW1oaXJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxODMwNDQsImV4cCI6MjA5Mzc1OTA0NH0.rEtIZ-Pzk0paEb2wom6wG1jJ6Dej_u5FO_TIoNRygEg"
+);
+
 document.addEventListener("DOMContentLoaded", () => {
 
   /* =========================
@@ -37,6 +44,26 @@ document.addEventListener("DOMContentLoaded", () => {
       return {};
     }
   }
+  const widgetId =
+  new URLSearchParams(window.location.search).get("id") ||
+  "default";
+  let moodLog = {};
+
+  async function loadMoodLog() {
+  const { data, error } = await supabase
+    .from("mood_logs")
+    .select("data")
+    .eq("id", widgetId)
+    .single();
+
+  if (data?.data) {
+    moodLog = data.data;
+  }
+
+  buildGrid();
+}
+
+loadMoodLog();
   /* =========================
      URL STATE
   ========================= */
@@ -76,10 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
  const urlParams = new URLSearchParams(window.location.search);
 const encodedMoods = urlParams.get("moods");
-
-let moodLog =
+  let moodLog =
   (encodedMoods && decodeMoodLog(encodedMoods)) ||
-  JSON.parse(localStorage.getItem("mood-log") || "{}");
+  JSON.parse(localStorage.getItem("mood-log") || "{}") ||
+  {};
 
 let moodMenu = null;
   /* =========================
@@ -129,29 +156,26 @@ let moodMenu = null;
     });
   }
 
-  /* =========================
-     SAVE MOOD
-  ========================= */
-function saveMood(key, mood) {
+async function saveMood(key, mood) {
   moodLog[key] = mood;
 
-  // 1. save to URL (for sharing)
-  const encoded = encodeMoodLog(moodLog);
+  renderCell(
+    document.querySelector(`[data-key="${key}"]`),
+    mood
+  );
 
-  const params = new URLSearchParams(window.location.search);
-  params.set("moods", encoded);
+  const { error } = await supabase
+    .from("mood_logs")
+    .upsert({
+      id: widgetId,
+      data: moodLog,
+      updated_at: new Date()
+    });
 
-  const newUrl =
-    window.location.pathname + "?" + params.toString();
-
-  window.history.replaceState({}, "", newUrl);
-
-  // 2. backup save (for Notion iframe reloads)
-  try {
-    localStorage.setItem("mood-log", JSON.stringify(moodLog));
-  } catch (e) {}
+  if (error) {
+    console.error("Supabase save error:", error);
+  }
 }
-
   /* =========================
      RENDER CELL
   ========================= */
@@ -228,7 +252,8 @@ function saveMood(key, mood) {
     getWeekDates().forEach(({ key, day, date }) => {
       const cell = document.createElement("div");
       cell.className = "day-cell";
-
+      cell.dataset.key = key;
+      
       cell.innerHTML = `
         <div class="day-label">
           ${day}
