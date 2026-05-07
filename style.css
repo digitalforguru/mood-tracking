@@ -533,20 +533,27 @@ button,
 #close-log-btn {
   appearance: none;
   -webkit-appearance: none;
-  -webkit-tap-highlight-color: transparent;
 
   border: none;
   outline: none;
 
   font-family: inherit;
   text-transform: lowercase;
-  text-decoration: none;
 
-  background: rgba(255, 255, 255, 0.78) !important;
-  color: #60355c !important;
+  background: rgba(255, 255, 255, 0.78);
+  color: inherit;
 
-  -webkit-user-select: none;
-  user-select: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+
+  transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
 }
 
 button:hover,
@@ -588,7 +595,6 @@ button:active,
   align-self: center;
   margin-top: 8px;
 }
-
 .copy-btn {
   border-radius: 999px !important;
 
