@@ -302,7 +302,7 @@ viewLogBtn?.addEventListener("click", (e) => {
   moodLogPopup.classList.remove("hidden");
   moodLogPopup.style.display = "block"; // 🔥 FORCE VISIBILITY FIX
 
-  document.body.appendChild(moodLogPopup); // 🔥 ensures it's not trapped visually
+  widgetBox.appendChild(moodLogPopup);
 });
 
   closeLogBtn?.addEventListener("click", () => {
