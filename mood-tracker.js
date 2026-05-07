@@ -27,6 +27,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyBtn = document.getElementById("copyLinkBtn");
   const copyMsg = document.getElementById("copyMessage");
 
+  function encodeMoodLog(obj) {
+  return encodeURIComponent(btoa(JSON.stringify(obj)));
+  }
+  function decodeMoodLog(str) {
+    try {
+      return JSON.parse(atob(decodeURIComponent(str)));
+    } catch {
+      return {};
+    }
+  }
   /* =========================
      URL STATE
   ========================= */
@@ -64,7 +74,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const days = ["sun","mon","tue","wed","thu","fri","sat"];
 
-  let moodLog = JSON.parse(localStorage.getItem("mood-log")) || {};
+  const urlParams = new URLSearchParams(window.location.search);
+const encodedMoods = urlParams.get("moods");
+
+let moodLog = encodedMoods
+  ? decodeMoodLog(encodedMoods)
+  : {};
   let moodMenu = null;
 
   /* =========================
@@ -117,10 +132,19 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =========================
      SAVE MOOD
   ========================= */
-  function saveMood(key, mood) {
-    moodLog[key] = mood;
-    localStorage.setItem("mood-log", JSON.stringify(moodLog));
-  }
+function saveMood(key, mood) {
+  moodLog[key] = mood;
+
+  const encoded = encodeMoodLog(moodLog);
+
+  const params = new URLSearchParams(window.location.search);
+  params.set("moods", encoded);
+
+  const newUrl =
+    window.location.pathname + "?" + params.toString();
+
+  window.history.replaceState({}, "", newUrl);
+}
 
   /* =========================
      RENDER CELL
@@ -258,11 +282,19 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   confirmReset?.addEventListener("click", () => {
-    moodLog = {};
-    localStorage.removeItem("mood-log");
-    buildGrid();
-    resetPopup.classList.add("hidden");
-  });
+  moodLog = {};
+  buildGrid();
+  resetPopup.classList.add("hidden");
+
+  const params = new URLSearchParams(window.location.search);
+  params.delete("moods");
+
+  window.history.replaceState(
+    {},
+    "",
+    window.location.pathname + "?" + params.toString()
+  );
+});
 
   cancelReset?.addEventListener("click", () => {
     resetPopup.classList.add("hidden");
@@ -314,8 +346,12 @@ viewLogBtn?.addEventListener("click", (e) => {
   ========================= */
   copyBtn?.addEventListener("click", async () => {
     const url =
-      `${location.origin}${location.pathname}` +
-      `?theme=${state.theme}&font=${state.font}&embed=true`;
+  `${location.origin}${location.pathname}` +
+  `?theme=${state.theme}&font=${state.font}` +
+  (Object.keys(moodLog).length
+    ? `&moods=${encodeMoodLog(moodLog)}`
+    : "") +
+  `&embed=true`;
 
     await navigator.clipboard.writeText(url);
 
