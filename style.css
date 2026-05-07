@@ -3,17 +3,32 @@ body {
   padding: 20px;
 
   background: transparent;
-
   font-family: 'Satoshi', sans-serif;
 
   display: flex;
-  flex-direction: column;
-
+  justify-content: center;
   align-items: center;
 
-  gap: 18px;
-
   min-height: 100vh;
+}
+.builder-ui,
+.widget {
+  display: inline-flex;
+  vertical-align: top;
+}
+body {
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.builder-ui {
+  width: 320px;
+}
+
+.widget {
+  width: 400px;
+}
+body {
+  align-content: center;
 }
 
 
