@@ -38,6 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
     embed: params.get("embed") === "true"
   };
 
+  if (state.embed) {
+  document.querySelector(".builder-ui").style.display = "none";
+}
   /* =========================
      THEMES
   ========================= */
