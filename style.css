@@ -524,3 +524,74 @@ body {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+button,
+.copy-btn,
+.reset-btn,
+.view-log-btn,
+#confirm-reset,
+#cancel-reset,
+#close-log-btn {
+  appearance: none;
+  -webkit-appearance: none;
+
+  border: none;
+  outline: none;
+
+  font-family: inherit;
+  text-transform: lowercase;
+
+  background: rgba(255, 255, 255, 0.78);
+  color: inherit;
+
+  border-radius: 999px;
+  padding: 7px 14px;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+
+  transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+
+button:hover,
+.copy-btn:hover,
+.reset-btn:hover,
+.view-log-btn:hover,
+#confirm-reset:hover,
+#cancel-reset:hover,
+#close-log-btn:hover {
+  transform: translateY(-1px) scale(1.03);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+button:active,
+.copy-btn:active,
+.reset-btn:active,
+.view-log-btn:active,
+#confirm-reset:active,
+#cancel-reset:active,
+#close-log-btn:active {
+  transform: scale(0.97);
+}
+
+#reset-button,
+#view-log-btn {
+  width: fit-content;
+  align-self: center;
+  margin: 3px 0;
+}
+
+.reset-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#close-log-btn {
+  align-self: center;
+  margin-top: 8px;
+}
