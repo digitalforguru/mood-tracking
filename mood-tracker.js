@@ -77,11 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
 const encodedMoods = urlParams.get("moods");
 
-let moodLog = encodedMoods
-  ? decodeMoodLog(encodedMoods)
-  : {};
-  let moodMenu = null;
-
+let moodLog =
+  (encodedMoods && decodeMoodLog(encodedMoods)) ||
+  JSON.parse(localStorage.getItem("mood-log") || "{}") ||
+  {};
   /* =========================
      THEME APPLY
   ========================= */
@@ -135,6 +134,7 @@ let moodLog = encodedMoods
 function saveMood(key, mood) {
   moodLog[key] = mood;
 
+  // 1. save to URL (for sharing)
   const encoded = encodeMoodLog(moodLog);
 
   const params = new URLSearchParams(window.location.search);
@@ -144,6 +144,11 @@ function saveMood(key, mood) {
     window.location.pathname + "?" + params.toString();
 
   window.history.replaceState({}, "", newUrl);
+
+  // 2. backup save (for Notion iframe reloads)
+  try {
+    localStorage.setItem("mood-log", JSON.stringify(moodLog));
+  } catch (e) {}
 }
 
   /* =========================
