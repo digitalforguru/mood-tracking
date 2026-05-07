@@ -211,7 +211,7 @@ function saveMood(key, mood) {
         saveMood(key, m);
         renderCell(cell, m);
         closeMenus();
-      };
+      });
 
       moodMenu.appendChild(el);
     });
