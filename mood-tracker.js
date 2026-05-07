@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyMsg = document.getElementById("copyMessage");
 
   /* =========================
-     URL STATE (SOURCE OF TRUTH)
+     URL STATE
   ========================= */
   const params = new URLSearchParams(window.location.search);
 
@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let moodMenu = null;
 
   /* =========================
-     THEME APPLY (FIXED)
+     THEME APPLY
   ========================= */
   function applyTheme(theme) {
     if (!widgetBox) return;
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     FONT APPLY (SCOPED ONLY)
+     FONT APPLY
   ========================= */
   function applyFont(font) {
     let fontFamily =
@@ -88,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
         : "'Satoshi', sans-serif";
 
     widgetBox.style.fontFamily = fontFamily;
-
     state.font = font;
   }
 
@@ -106,7 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       return {
         day: days[i],
-        key: d.toISOString().split("T")[0]
+        key: d.toISOString().split("T")[0],
+        date: d.getDate()
       };
     });
   }
@@ -187,24 +187,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     BUILD GRID
+     BUILD GRID (FIXED DATE DISPLAY)
   ========================= */
   function buildGrid() {
     grid.innerHTML = "";
 
-    getWeekDates().forEach(({ key, day }) => {
+    getWeekDates().forEach(({ key, day, date }) => {
       const cell = document.createElement("div");
       cell.className = "day-cell";
 
-      const date = key.split("-")[2]; // extracts day number
-      
       cell.innerHTML = `
         <div class="day-label">
           ${day}
           <span class="day-date">${date}</span>
-          </div>
-          <div class="day-content"></div>
-        `;
+        </div>
+        <div class="day-content"></div>
+      `;
+
       renderCell(cell, moodLog[key]);
 
       cell.onclick = (e) => {
@@ -217,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* =========================
-     THEME UI (FIXED)
+     THEME UI
   ========================= */
   themeToggle?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -225,15 +224,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   themeCircles.forEach(circle => {
-    circle.addEventListener("click", (e) => {
+    circle.addEventListener("click", () => {
       const theme = circle.dataset.theme;
       applyTheme(theme);
-      themeOptions.classList.add("hidden");
+      themeOptions?.classList.add("hidden");
     });
   });
 
   /* =========================
-     FONT UI (FIXED)
+     FONT UI
   ========================= */
   fontToggle?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -243,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fontChoices.forEach(opt => {
     opt.addEventListener("click", () => {
       applyFont(opt.dataset.font);
-      fontOptions.classList.add("hidden");
+      fontOptions?.classList.add("hidden");
     });
   });
 
@@ -267,26 +266,51 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* =========================
-     LOG (FIXED)
+     LOG (GRID STYLE READY HOOK)
   ========================= */
-  viewLogBtn?.addEventListener("click", () => {
-    logEntriesDiv.innerHTML = "";
+  /* =========================
+   LOG (YEAR GRID VERSION)
+========================= */
+viewLogBtn?.addEventListener("click", () => {
+  logEntriesDiv.innerHTML = "";
 
-    Object.entries(moodLog).forEach(([k, v]) => {
-      const div = document.createElement("div");
-      div.textContent = `${k} → ${v.label}`;
-      logEntriesDiv.appendChild(div);
-    });
+  const today = new Date();
+  const yearStart = new Date(today.getFullYear(), 0, 1);
 
-    moodLogPopup.classList.remove("hidden");
-  });
+  const totalDays = 365;
+
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(yearStart);
+    d.setDate(yearStart.getDate() + i);
+
+    const key = d.toISOString().split("T")[0];
+    const mood = moodLog[key];
+
+    const cell = document.createElement("div");
+    cell.className = "year-cell";
+
+    if (mood) {
+      cell.style.background = mood.color;
+      cell.setAttribute(
+        "data-tooltip",
+        `${key} → ${mood.label}`
+      );
+    } else {
+      cell.setAttribute("data-tooltip", `${key} → no mood`);
+    }
+
+    logEntriesDiv.appendChild(cell);
+  }
+
+  moodLogPopup.classList.remove("hidden");
+});
 
   closeLogBtn?.addEventListener("click", () => {
     moodLogPopup.classList.add("hidden");
   });
 
   /* =========================
-     COPY LINK (FIXED STATE BUG)
+     COPY LINK
   ========================= */
   copyBtn?.addEventListener("click", async () => {
     const url =
@@ -310,7 +334,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", closeMenus);
 
   /* =========================
-     INIT (IMPORTANT FIX)
+     INIT
   ========================= */
   applyTheme(state.theme);
   applyFont(state.font);
