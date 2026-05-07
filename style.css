@@ -421,6 +421,11 @@ body {
 .log-popup {
   max-height: 85%;
 }
+#close-log-btn {
+  margin-top: 8px;
+  position: relative;
+  z-index: 999;
+}
 
 .widget-header {
   font-size: 15px;
