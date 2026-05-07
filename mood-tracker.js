@@ -6,7 +6,6 @@ const supabase = createClient(
 );
 
 document.addEventListener("DOMContentLoaded", () => {
-
   /* =========================
      ELEMENTS
   ========================= */
@@ -34,36 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const copyBtn = document.getElementById("copyLinkBtn");
   const copyMsg = document.getElementById("copyMessage");
 
-  function encodeMoodLog(obj) {
-  return encodeURIComponent(btoa(JSON.stringify(obj)));
-  }
-  function decodeMoodLog(str) {
-    try {
-      return JSON.parse(atob(decodeURIComponent(str)));
-    } catch {
-      return {};
-    }
-  }
-  const widgetId =
-  new URLSearchParams(window.location.search).get("id") ||
-  "default";
-  let moodLog = {};
-
-  async function loadMoodLog() {
-  const { data, error } = await supabase
-    .from("mood_logs")
-    .select("data")
-    .eq("id", widgetId)
-    .single();
-
-  if (data?.data) {
-    moodLog = data.data;
-  }
-
-  buildGrid();
-}
-
-loadMoodLog();
   /* =========================
      URL STATE
   ========================= */
@@ -75,11 +44,16 @@ loadMoodLog();
     embed: params.get("embed") === "true"
   };
 
+  const widgetId =
+    params.get("id") ||
+    (crypto.randomUUID ? crypto.randomUUID() : `mood-${Date.now()}`);
+
   if (state.embed) {
-  document.querySelector(".builder-ui").style.display = "none";
-}
+    document.querySelector(".builder-ui")?.style.setProperty("display", "none");
+  }
+
   /* =========================
-     THEMES
+     DATA
   ========================= */
   const themes = {
     pink: "#f4dfeb",
@@ -99,23 +73,18 @@ loadMoodLog();
     { color: "#FFA5C5", label: "awesome" }
   ];
 
-  const days = ["sun","mon","tue","wed","thu","fri","sat"];
+  const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
- const urlParams = new URLSearchParams(window.location.search);
-const encodedMoods = urlParams.get("moods");
-  let moodLog =
-  (encodedMoods && decodeMoodLog(encodedMoods)) ||
-  JSON.parse(localStorage.getItem("mood-log") || "{}") ||
-  {};
+  let moodLog = {};
+  let moodMenu = null;
 
-let moodMenu = null;
   /* =========================
      THEME APPLY
   ========================= */
   function applyTheme(theme) {
     if (!widgetBox) return;
 
-    widgetBox.classList.remove("pink","green","beige","blue");
+    widgetBox.classList.remove("pink", "green", "beige", "blue");
     widgetBox.classList.add(theme);
 
     state.theme = theme;
@@ -125,15 +94,75 @@ let moodMenu = null;
      FONT APPLY
   ========================= */
   function applyFont(font) {
-    let fontFamily =
+    if (!widgetBox) return;
+
+    const fontFamily =
       font === "serif"
         ? "Georgia, serif"
         : font === "mono"
-        ? "ui-monospace, monospace"
+        ? "ui-monospace, SFMono-Regular, Menlo, monospace"
         : "'Satoshi', sans-serif";
 
     widgetBox.style.fontFamily = fontFamily;
     state.font = font;
+  }
+
+  /* =========================
+     SUPABASE LOAD
+  ========================= */
+  async function loadMoodLog() {
+    const { data, error } = await supabase
+      .from("mood_logs")
+      .select("data")
+      .eq("id", widgetId)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Supabase load error:", error);
+      return;
+    }
+
+    if (data?.data) {
+      moodLog = data.data;
+      buildGrid();
+    }
+  }
+
+  /* =========================
+     SUPABASE SAVE
+  ========================= */
+  async function saveMood(key, mood) {
+    moodLog[key] = mood;
+
+    const { error } = await supabase
+      .from("mood_logs")
+      .upsert({
+        id: widgetId,
+        data: moodLog,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error("Supabase save error:", error);
+    }
+  }
+
+  async function resetMoodLog() {
+    moodLog = {};
+
+    const { error } = await supabase
+      .from("mood_logs")
+      .upsert({
+        id: widgetId,
+        data: moodLog,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error("Supabase reset error:", error);
+    }
+
+    buildGrid();
   }
 
   /* =========================
@@ -142,7 +171,9 @@ let moodMenu = null;
   function getWeekDates() {
     const today = new Date();
     const start = new Date(today);
+
     start.setDate(today.getDate() - today.getDay());
+    start.setHours(0, 0, 0, 0);
 
     return Array.from({ length: 7 }).map((_, i) => {
       const d = new Date(start);
@@ -156,31 +187,15 @@ let moodMenu = null;
     });
   }
 
-async function saveMood(key, mood) {
-  moodLog[key] = mood;
-
-  renderCell(
-    document.querySelector(`[data-key="${key}"]`),
-    mood
-  );
-
-  const { error } = await supabase
-    .from("mood_logs")
-    .upsert({
-      id: widgetId,
-      data: moodLog,
-      updated_at: new Date()
-    });
-
-  if (error) {
-    console.error("Supabase save error:", error);
-  }
-}
   /* =========================
      RENDER CELL
   ========================= */
   function renderCell(cell, mood) {
+    if (!cell) return;
+
     const content = cell.querySelector(".day-content");
+    if (!content) return;
+
     content.innerHTML = "";
 
     if (!mood) {
@@ -221,39 +236,44 @@ async function saveMood(key, mood) {
     moodMenu = document.createElement("div");
     moodMenu.className = "mood-menu";
 
-    moods.forEach(m => {
-      const el = document.createElement("div");
-      el.className = "mood-option";
+    moods.forEach((mood) => {
+      const option = document.createElement("div");
+      option.className = "mood-option";
 
-      el.innerHTML = `
-        <div class="mood-color" style="background:${m.color}"></div>
-        <div>${m.label}</div>
+      option.innerHTML = `
+        <div class="mood-color" style="background:${mood.color}"></div>
+        <div>${mood.label}</div>
       `;
 
-      el.addEventListener("click", (e) => {
+      option.addEventListener("click", async (e) => {
         e.stopPropagation();
-        saveMood(key, m);
-        renderCell(cell, m);
+
+        renderCell(cell, mood);
         closeMenus();
+
+        await saveMood(key, mood);
       });
 
-      moodMenu.appendChild(el);
+      moodMenu.appendChild(option);
     });
 
     widgetBox.appendChild(moodMenu);
   }
 
   /* =========================
-     BUILD GRID (FIXED DATE DISPLAY)
+     BUILD GRID
   ========================= */
   function buildGrid() {
+    if (!grid) return;
+
     grid.innerHTML = "";
 
     getWeekDates().forEach(({ key, day, date }) => {
       const cell = document.createElement("div");
+
       cell.className = "day-cell";
       cell.dataset.key = key;
-      
+
       cell.innerHTML = `
         <div class="day-label">
           ${day}
@@ -265,9 +285,9 @@ async function saveMood(key, mood) {
       renderCell(cell, moodLog[key]);
 
       cell.addEventListener("click", (e) => {
-  e.stopPropagation();
-  createMoodMenu(cell, key);
-});
+        e.stopPropagation();
+        createMoodMenu(cell, key);
+      });
 
       grid.appendChild(cell);
     });
@@ -281,10 +301,13 @@ async function saveMood(key, mood) {
     themeOptions?.classList.toggle("hidden");
   });
 
-  themeCircles.forEach(circle => {
-    circle.addEventListener("click", () => {
+  themeCircles.forEach((circle) => {
+    circle.addEventListener("click", (e) => {
+      e.stopPropagation();
+
       const theme = circle.dataset.theme;
       applyTheme(theme);
+
       themeOptions?.classList.add("hidden");
     });
   });
@@ -297,9 +320,13 @@ async function saveMood(key, mood) {
     fontOptions?.classList.toggle("hidden");
   });
 
-  fontChoices.forEach(opt => {
-    opt.addEventListener("click", () => {
-      applyFont(opt.dataset.font);
+  fontChoices.forEach((option) => {
+    option.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const font = option.dataset.font;
+      applyFont(font);
+
       fontOptions?.classList.add("hidden");
     });
   });
@@ -309,87 +336,85 @@ async function saveMood(key, mood) {
   ========================= */
   resetButton?.addEventListener("click", (e) => {
     e.stopPropagation();
-    resetPopup.classList.remove("hidden");
+    resetPopup?.classList.remove("hidden");
   });
 
-  confirmReset?.addEventListener("click", () => {
-  moodLog = {};
-  buildGrid();
-  resetPopup.classList.add("hidden");
+  confirmReset?.addEventListener("click", async (e) => {
+    e.stopPropagation();
 
-  const params = new URLSearchParams(window.location.search);
-  params.delete("moods");
+    await resetMoodLog();
 
-  window.history.replaceState(
-    {},
-    "",
-    window.location.pathname + "?" + params.toString()
-  );
-});
-
-  cancelReset?.addEventListener("click", () => {
-    resetPopup.classList.add("hidden");
+    resetPopup?.classList.add("hidden");
   });
 
-viewLogBtn?.addEventListener("click", (e) => {
-  e.stopPropagation();
+  cancelReset?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    resetPopup?.classList.add("hidden");
+  });
 
-  logEntriesDiv.innerHTML = "";
+  /* =========================
+     VIEW LOG
+  ========================= */
+  viewLogBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
 
-  const today = new Date();
-  const yearStart = new Date(today.getFullYear(), 0, 1);
+    if (!logEntriesDiv || !moodLogPopup) return;
 
-  const totalDays = 365;
+    logEntriesDiv.innerHTML = "";
 
-  for (let i = 0; i < totalDays; i++) {
-    const d = new Date(yearStart);
-    d.setDate(yearStart.getDate() + i);
+    const today = new Date();
+    const yearStart = new Date(today.getFullYear(), 0, 1);
+    const totalDays = 365;
 
-    const key = d.toISOString().split("T")[0];
-    const mood = moodLog[key];
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(yearStart);
+      d.setDate(yearStart.getDate() + i);
 
-    const cell = document.createElement("div");
-    cell.className = "year-cell";
+      const key = d.toISOString().split("T")[0];
+      const mood = moodLog[key];
 
-    if (mood) {
-      cell.style.background = mood.color;
-      cell.title = `${key} → ${mood.label}`;
-    } else {
-      cell.style.background = "#f2f2f2";
-      cell.title = `${key} → no mood`;
+      const cell = document.createElement("div");
+      cell.className = "year-cell";
+
+      if (mood) {
+        cell.style.background = mood.color;
+        cell.title = `${key} → ${mood.label}`;
+      } else {
+        cell.style.background = "#f2f2f2";
+        cell.title = `${key} → no mood`;
+      }
+
+      logEntriesDiv.appendChild(cell);
     }
 
-    logEntriesDiv.appendChild(cell);
-  }
+    moodLogPopup.classList.remove("hidden");
+  });
 
-  moodLogPopup.classList.remove("hidden");
-  moodLogPopup.style.display = "block"; // 🔥 FORCE VISIBILITY FIX
-
-  widgetBox.appendChild(moodLogPopup);
-});
-
-  closeLogBtn?.addEventListener("click", () => {
-    moodLogPopup.classList.add("hidden");
+  closeLogBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    moodLogPopup?.classList.add("hidden");
   });
 
   /* =========================
      COPY LINK
   ========================= */
-  copyBtn?.addEventListener("click", async () => {
+  copyBtn?.addEventListener("click", async (e) => {
+    e.stopPropagation();
+
     const url =
-  `${location.origin}${location.pathname}` +
-  `?theme=${state.theme}&font=${state.font}` +
-  (Object.keys(moodLog).length
-    ? `&moods=${encodeMoodLog(moodLog)}`
-    : "") +
-  `&embed=true`;
+      `${location.origin}${location.pathname}` +
+      `?id=${encodeURIComponent(widgetId)}` +
+      `&theme=${encodeURIComponent(state.theme)}` +
+      `&font=${encodeURIComponent(state.font)}` +
+      `&embed=true`;
 
     await navigator.clipboard.writeText(url);
 
     copyMsg?.classList.remove("hidden");
     copyMsg?.classList.add("show");
 
-    setTimeout(() => {
+    clearTimeout(window.__copyTimer);
+    window.__copyTimer = setTimeout(() => {
       copyMsg?.classList.add("hidden");
       copyMsg?.classList.remove("show");
     }, 1500);
@@ -406,4 +431,5 @@ viewLogBtn?.addEventListener("click", (e) => {
   applyTheme(state.theme);
   applyFont(state.font);
   buildGrid();
+  loadMoodLog();
 });
