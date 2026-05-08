@@ -616,3 +616,47 @@ button:active,
   align-items: center;
   justify-content: center;
 }
+
+.widget.black {
+  background: #1b1b1f;
+  color: #e7e1dc;
+}
+
+.widget.black .day-cell,
+.widget.black .checkin-textarea,
+.widget.black .weekly-grid,
+.widget.black .calendar-day,
+.widget.black .vision-cell {
+  background: rgba(255,255,255,0.06);
+  color: #e7e1dc;
+}
+
+.widget.black button,
+.widget.black .reset-btn,
+.widget.black .view-log-btn,
+.widget.black .save-btn,
+.widget.black .copy-btn {
+  background: rgba(255,255,255,0.08) !important;
+  color: #e7e1dc !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.22);
+}
+
+.widget.black .mood-menu,
+.widget.black .reset-popup,
+.widget.black .log-popup,
+.widget.black .entries-popup {
+  background: #242429;
+  color: #e7e1dc;
+}
+
+.widget.black .day-label,
+.widget.black .day-date,
+.widget.black .widget-header-title,
+.widget.black .checkin-prompt {
+  color: rgba(231,225,220,0.72);
+}
+
+.widget.black .mood-option:hover,
+.widget.black button:hover {
+  background: rgba(255,255,255,0.11) !important;
+}
