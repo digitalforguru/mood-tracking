@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyTheme(theme) {
     if (!widgetBox) return;
 
-    widgetBox.classList.remove("pink", "green", "beige", "blue");
+    widgetBox.classList.remove("pink", "green", "beige", "blue", "black", "white");
     widgetBox.classList.add(theme);
 
     state.theme = theme;
